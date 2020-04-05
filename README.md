@@ -5,15 +5,15 @@ This action grabs the github work directory (or any of your choice) scans it for
 It will add a suffix with the `branch_name_`  to any script that's not part of the master branch
 ## Inputs
 
-### jamf_url
+### `jamf_url`
 
 **Required** the url of your jamf instance
 
-### jamf_username
+### `jamf_username`
 
 **Required** the username to auth against jamf. *this user should have permission to update and create scripts.*
 
-### jamf_password
+### `jamf_password`
 
 **Required** password for the user
 
@@ -25,6 +25,7 @@ what scripts were updated
 
 ## Example usage
 
+```yaml
 on:
   pull_request:
     branches: [master]
@@ -46,5 +47,4 @@ jobs:
             - jamf_password: ${{ secrets.jamf_password }}
         - name: grab the result
           run: echo "The result was ${{ steps.jamf_scripts.outputs.result }}"
-
-    
+```  
