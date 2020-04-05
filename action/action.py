@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+#created by Juan Garces
+
 import os
 import glob
 import requests
@@ -5,6 +8,9 @@ import logging
 import jmespath
 import hashlib
 
+#testing
+from dotenv import load_dotenv
+load_dotenv()
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -84,7 +90,7 @@ def create_jamf_script(payload):
 
 
 #retrieves all scripts in a json
-def get_jamf_scripts(scripts = {}, page = 0):
+def get_jamf_scripts(scripts = [], page = 0):
     header = { "Authorization": "Bearer {}".format(token) }
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
@@ -94,10 +100,11 @@ def get_jamf_scripts(scripts = {}, page = 0):
         print("we have searched {} of {} results".format(len(script_list['results'])+page, script_list['totalCount']))
         if (page*page_size) < script_list['totalCount']:
             print("seems there's more to grab")
-            return get_jamf_scripts(scripts.update(script_list['results']), page+1)
+            scripts.extend(script_list['results'])
+            return get_jamf_scripts(scripts, page+1)
         else:
             print("reached the end of our search")
-            scripts.update(script_list['results'])
+            scripts.extend(script_list['results'])
             return scripts
     else:
         print("::set-output name=result::{}".format('failed to retrieve scripts from jamf'))
@@ -138,15 +145,20 @@ def compare_scripts(new, old):
     md5_new = hashlib.md5(new.encode()) 
     md5_old = hashlib.md5(old.encode())
     if md5_new.hexdigest() == md5_old.hexdigest():
+        print("scripts are the same")
         return True
     else:
+        print("scripts are different")
         return False
 
-#retrieves list of files given a folder and the list of valid file extensions to look for
+#retrieves list of files given a folder path and the list of valid file extensions to look for
 def find_local_scripts(script_dir, script_extensions):
     script_list = []
+    print('searching for files ending in {} in {}'.format(script_extensions, script_dir))
     for file_type in script_extensions:
         script_list.extend(glob.glob('{}/**/*.{}'.format(script_dir, file_type), recursive = True))
+    print("found these: ")
+    print(script_list)
     return script_list
 
 #strips out the path and extension to get the scripts name
@@ -160,7 +172,7 @@ if __name__ == "__main__":
     password = os.environ['INPUT_JAMF_PASSWORD']
     script_dir = os.environ['INPUT_SCRIPT_DIR']
     suffix = os.environ['INPUT_BRANCH_NAME']
-    script_extenions = os.environ['INPUT_SCRIPT_EXTENSIONS']
+    script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
 
     #grab the token from jamf
     token = get_jamf_token(url, username, password)
@@ -175,7 +187,7 @@ if __name__ == "__main__":
             #if it's not the master branch then we will use the branch name as a suffix_
             script_name = "{}_{}".format(suffix.strip('/')[0],get_script_name(script))
         #check to see if the script name exists in jamf
-        script_search = jmespath.search("[?name == '{}']".format(script_name), script_list)
+        script_search = jmespath.search("[?name == '{}']".format(script_name), jamf_scripts)
         if len(script_search) == 0:
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
@@ -185,11 +197,10 @@ if __name__ == "__main__":
             #it does exists, lets see if has changed
             with open(script, 'r') as upload_script:
                 script_text = upload_script.read()
-                if not compare_scripts(script_text, script_search[0]):
+                if not compare_scripts(script_text, script_search[0]['scriptContents']):
                     #the hash of the scripts is not the same, so we'll update it
                     script['scriptContents'] =  "{}".format(script_text)
                     update_jamf_script(script)
-
     print("::set-output name=result::{}".format('this is my temporary result'))
 
 
