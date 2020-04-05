@@ -9,8 +9,8 @@ import jmespath
 import hashlib
 
 #testing
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -165,6 +165,15 @@ def find_local_scripts(script_dir, script_extensions):
 def get_script_name(script_path):
     return script_path.split('/')[-1].split('.')[0]
 
+
+def test():
+    print('url is: '+url)
+    print('script_dir is: '+script_dir)
+    print('suffix is: '+suffix)
+    print('scripts_exteions are:'+ script_extenions)
+    print("::set-output name=result::{}".format('this ist he result of the test, which seems to have worked?'))
+
+
 if __name__ == "__main__":
     #jamf_args = read_args(sys.argv[1:])
     url = os.environ['INPUT_JAMF_URL']
@@ -173,7 +182,8 @@ if __name__ == "__main__":
     script_dir = os.environ['INPUT_SCRIPT_DIR']
     suffix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
-
+    test()
+    
     #grab the token from jamf
     token = get_jamf_token(url, username, password)
     local_scripts = find_local_scripts(script_dir, script_extenions)
@@ -201,6 +211,6 @@ if __name__ == "__main__":
                     #the hash of the scripts is not the same, so we'll update it
                     script['scriptContents'] =  "{}".format(script_text)
                     update_jamf_script(script)
-    print("::set-output name=result::{}".format('this is my temporary result'))
+    
 
 
