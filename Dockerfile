@@ -1,6 +1,6 @@
 FROM python:3.7-alpine
-COPY . /app
-WORKDIR /app
+COPY . /action
+WORKDIR /action
 RUN pip install -r requirements.txt
 ENTRYPOINT ["python"]
-CMD ["jamf_scripts_action/app.py"]
+CMD ["action/action.py"]

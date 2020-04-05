@@ -1,0 +1,41 @@
+name: 'JAMF scripts'
+description: >
+    creates or updates scripts in jamf from a given directory, using the filename to name the script.
+    it will create suffixes using the branch name for any other branch that's not master
+inputs:
+    jamf_url:
+        description: 'url of your jamf instance'
+        required: true
+    jamf_username:
+        description: 'username to auth against jamf'
+        required: true
+    jamf_password:
+        description: 'password to auth against jamf'
+        required: true
+    script_dir:
+        description: >
+            the directory where the scripts to process are
+            defaults to the github.workspace environment variable
+        default: ${{ github.workspace }}
+    script_extensions:
+        description: >
+            extension for the types of scripts we'll be looking to upload
+            defaults to .sh and .py files
+        default: 
+            - sh
+            - py
+    branch_name:
+        description: >
+            the branch that triggered the action, we're going to use this
+            to add a suffix to the script. Only master version of the script remain withot the suffix
+        default: ${{ github.github_ref }}
+ outputs:
+     result:
+         description: 'result of updating the script'
+runs:
+    using: 'docker'
+    image: 'Dockerfile'
+
+branding:
+    color: purple
+    icon: link
