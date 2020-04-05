@@ -17,6 +17,19 @@ It will add a suffix with the `branch_name_`  to any script that's not part of t
 
 **Required** password for the user
 
+### `script_dir`
+
+**optional** the directory where the scripts to upload will be. Defaults to the github.workdir environment variable
+
+### `script_extensions`
+
+**optional** the extensions for the types of files we'll be searching for. Defaults to *.sh* and *.py* files
+
+### `branch_name`
+
+**optional** branch that triggers the action. We'll use this to tag the scripts so multiple branches don't overwrite the same script
+
+
 ## Outputs
 
 ### `results`
