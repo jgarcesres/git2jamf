@@ -172,6 +172,7 @@ def test():
     print('suffix is: '+suffix)
     print('scripts_exteions are:'+ script_extensions)
     print("::set-output name=result::{}".format('this ist he result of the test, which seems to have worked?'))
+    exit(0)
 
 
 if __name__ == "__main__":
