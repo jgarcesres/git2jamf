@@ -228,5 +228,7 @@ if __name__ == "__main__":
                 else:
                     print("since the scripts are still the same, we're skipping this one.")
     
-
+    print("expiring the token so it can't be used further")
+    invalidate_jamf_token()
+    print("finished!")
 
