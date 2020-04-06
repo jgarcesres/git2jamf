@@ -2,7 +2,7 @@
 This action grabs the github work directory (or any of your choice) scans it for scripts and compares them against a pull of all scripts on jamf:
 * If it doesn't exist, it will create it
 * if it exists, it will update it if it's different than the one in jamf.
-It will add a suffix with the `branch_name_`  to any script that's not part of the master branch
+* It will add a suffix with the `branch_name_`  to any script that's not part of the master branch
 ## Inputs
 
 ### `jamf_url`
