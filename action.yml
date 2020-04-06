@@ -26,7 +26,7 @@ inputs:
         description: >
             the branch that triggered the action, we're going to use this
             to add a suffix to the script. Only master version of the script remain withot the suffix
-        default: ${{ github.github_ref }}
+        default: ${{ github.ref }}
 outputs:
     result:
         description: 'result of updating the script'
