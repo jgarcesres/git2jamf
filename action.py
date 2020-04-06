@@ -215,15 +215,16 @@ if __name__ == "__main__":
                 payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":"{}".format(upload_script.read()) } 
                 create_jamf_script(payload)
         elif len(script_search) == 1:
+            jamf_script = script_search.pop()
             print("it does exist, lets update it!")
             #it does exists, lets see if has changed
             with open(script, 'r') as upload_script:
                 script_text = upload_script.read()
-                if not compare_scripts(script_text, script_search[0]['scriptContents']):
+                if not compare_scripts(script_text, jamf_script['scriptContents']):
                     print("the local version is different than the one in jamf, updating jamf")
                     #the hash of the scripts is not the same, so we'll update it
-                    script['scriptContents'] =  "{}".format(script_text)
-                    update_jamf_script(script)
+                    jamf_script['scriptContents'] = script_text
+                    update_jamf_script(jamf_script)
                 else:
                     print("since the scripts are still the same, we're skipping this one.")
     
