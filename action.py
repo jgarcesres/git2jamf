@@ -166,7 +166,7 @@ if __name__ == "__main__":
     print('doublechecking for duplicate names. if we have any, they will be excluded')
     for script in simple_name_local_scripts:
         search = jmespath.search("[?name == '{}']".format(script), simple_name_local_scripts)
-        if search >= 2:
+        if len(search) >= 2:
             print("found a conflicting script name, please resolve it. it will be excluded from this run")
             print("excluded: {}".format(script))
             excluded_scripts.append(script)
