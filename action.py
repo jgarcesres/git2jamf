@@ -93,7 +93,7 @@ def get_jamf_scripts(scripts = [], page = 0):
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
     script_list = requests.get(url='{}/uapi/v1/scripts'.format(url), headers=header, params=params)
-    if script_list.status_code in range(200, 300):
+    if script_list.status_code in range(200,205):
         script_list = script_list.json()
         print("we have searched {} of {} results".format(len(script_list['results'])+page, script_list['totalCount']))
         if (page*page_size) < script_list['totalCount']:
@@ -102,6 +102,7 @@ def get_jamf_scripts(scripts = [], page = 0):
             return get_jamf_scripts(scripts, page+1)
         else:
             print("reached the end of our search")
+            print("retrieved {} total scripts".format(len(scripts)))
             scripts.extend(script_list['results'])
             return scripts
     else:
@@ -118,7 +119,7 @@ def find_jamf_script(script_name, page = 0):
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
     script_list = requests.get(url='{}/uapi/v1/scripts'.format(url), headers=header, params=params)
-    if script_list.status_code in range(200, 300):
+    if script_list.status_code in [200, 201]]:
         script_list = script_list.json()
         print("we have searched {} of {} results".format(len(script_list['results'])+page, script_list['totalCount']))
         script_search = jmespath.search("results[?name == '{}']".format(script_name), script_list)
@@ -192,8 +193,11 @@ if __name__ == "__main__":
     local_scripts = find_local_scripts(script_dir, script_extensions)
     print('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
-    
-    for script in local_scripts:
+    print("got the list from jamf")
+    print("processing each script now")
+    for count, script in enumerate(local_scripts):
+        print("----------------------")
+        print("script {} of {} ".format(count, len(local_scripts)))
         if 'master' in prefix:
             print(" we're in the master branch, we won't use the prefix")
             #if this is the master branch we'll go with the vanilla name
