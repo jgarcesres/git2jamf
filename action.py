@@ -97,6 +97,8 @@ def get_jamf_scripts(scripts = [], page = 0):
         script_list = script_list.json()
         print("we have searched {} of {} results".format(len(script_list['results'])+page, script_list['totalCount']))
         page+=1
+        print("increasing page counter +1, now at {}".format(page))
+        print("{} should be > than {}".format((page*page_size), script_list['totalCount']))
         if (page*page_size) < script_list['totalCount']:
             print("seems there's more to grab")
             scripts.extend(script_list['results'])
