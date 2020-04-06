@@ -54,7 +54,7 @@ def get_jamf_token(url, username, password):
 #function to invalidate a token so it can't be use after we're done
 def invalidate_jamf_token():
     header = { "Authorization": "Bearer {}".format(token) }
-    token_request = requests.post(url='{}/uapi/auth/invalidateToken'.format(), headers=header)
+    token_request = requests.post(url='{}/uapi/auth/invalidateToken'.format(url), headers=header)
     if token_request.status_code in range(200, 300):
         print("token invalidated succesfully")
         return True
