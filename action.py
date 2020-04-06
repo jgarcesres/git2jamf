@@ -170,9 +170,10 @@ def test():
     print('url is: '+url)
     print('script_dir is: '+script_dir)
     print('suffix is: '+suffix)
-    print('scripts_exteions are:'+ script_extensions)
+    print('scripts_extensions are:'+ script_extensions)
     print("::set-output name=result::{}".format('this ist he result of the test, which seems to have worked?'))
-    exit(0)
+    local_scripts = find_local_scripts(script_dir, script_extensions)
+
 
 
 if __name__ == "__main__":
@@ -183,7 +184,9 @@ if __name__ == "__main__":
     script_dir = os.environ['INPUT_SCRIPT_DIR']
     suffix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
+    script_extensions = script_extensions.split()
     test()
+    return 0
     
     #grab the token from jamf
     token = get_jamf_token(url, username, password)
