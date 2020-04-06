@@ -137,7 +137,7 @@ def find_jamf_script(script_name, page = 0):
         print("::set-output name=result::{}".format('failed to retrieve script from jamf'))
         print("status code: {}".format(script_list.status_code))
         print("error retrevieving script list")
-        print(token_request.text)
+        print(script_list.text)
         exit(1)
 
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
