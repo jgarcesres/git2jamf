@@ -3,4 +3,4 @@ COPY . /action
 WORKDIR /action
 RUN pip install -r requirements.txt
 ENTRYPOINT ["python"]
-CMD ["action/action.py"]
+CMD ["/action/action.py"]
