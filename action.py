@@ -201,7 +201,7 @@ if __name__ == "__main__":
         else:
             print("not the master branch, using the branch name as a prefix")
             #if it's not the master branch then we will use the branch name as a prefix_
-            prefix = prefix.strip('/')[-1]
+            prefix = prefix.split('/')[-1]
             script_name = "{}_{}".format(prefix,get_script_name(script))
             print("new scripts name: {}".format(script_name))
         #check to see if the script name exists in jamf
