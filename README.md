@@ -40,24 +40,27 @@ what scripts were updated
 
 ```yaml
 on:
-  pull_request:
-    branches: [master]
-    types: [synchronize, closed]
-    paths:
-      - 'scripts/'
+  push:
+    branches: 
+      - master
+      - juan*
+    # paths:
+    #   - scripts/**
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
-      name: A job to push script changes to jamf
-      steps:
-        - name: checkout
-          uses: actions/checkout@2
-        - name: jamf_scripts 
-          uses: jgarcesres/jamf_scripts_action@master
-          with:
-            - jamf_url: ${{ secrets.jamf_url }}
-            - jamf_username: ${{ secrets.jamf_username }}
-            - jamf_password: ${{ secrets.jamf_password }}
-        - name: grab the result
-          run: echo "The result was ${{ steps.jamf_scripts.outputs.result }}"
+    name: A job to push script changes to jamf
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: jamf_scripts 
+        uses: jgarcesres/jamf_scripts_githubaction@master
+        with: 
+          jamf_url: ${{ secrets.jamf_url }}
+          jamf_username: ${{ secrets.jamf_username }}
+          jamf_password: ${{ secrets.jamf_password }}
+          script_dir: scripts
+      - name: grab the result
+        run: echo "The result was ${{ steps.jamf_scripts.outputs.result }}"
+
 ```  
