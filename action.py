@@ -186,7 +186,7 @@ if __name__ == "__main__":
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
     test()
-    return 0
+    exit(0)
     
     #grab the token from jamf
     token = get_jamf_token(url, username, password)
