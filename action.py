@@ -67,7 +67,7 @@ def update_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
     if script_request.status_code in range(200, 300):
-        print("script succesfully")
+        print("script was updated succesfully")
         return True
     else:
         print("::set-output name=result::{}".format('failed to update script: {}'.format(payload['name'])))
@@ -197,7 +197,7 @@ if __name__ == "__main__":
     print("processing each script now")
     for count, script in enumerate(local_scripts):
         print("----------------------")
-        print("script {} of {} ".format(count, len(local_scripts)))
+        print("script {} of {} ".format(count+1, len(local_scripts)))
         if 'master' in prefix:
             print(" we're in the master branch, we won't use the prefix")
             #if this is the master branch we'll go with the vanilla name
