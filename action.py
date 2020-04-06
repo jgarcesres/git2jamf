@@ -176,7 +176,7 @@ if __name__ == "__main__":
     print("setting all script names to lower case to avoid false positives in our search. \n Worry not, this won't affect the actual naming")
     lower_case_jamf_scripts = jamf_scripts
     for script in lower_case_jamf_scripts:
-        lower_case_jamf_scripts['name'] = lower_case_jamf_scripts['name'].lower() 
+        script['name'] = script['name'].lower() 
     print("got the list from jamf")
     print("processing each script now")
     for count, script in enumerate(local_scripts):
