@@ -21,9 +21,7 @@ inputs:
         description: >
             extension for the types of scripts we'll be looking to upload
             defaults to .sh and .py files
-        default: 
-            - sh
-            - py
+        default: 'sh py'
     branch_name:
         description: >
             the branch that triggered the action, we're going to use this
