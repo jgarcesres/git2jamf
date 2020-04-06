@@ -53,7 +53,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: jamf_scripts 
-        uses: jgarcesres/jamf_scripts_githubaction@master
+        uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_url }}
           jamf_username: ${{ secrets.jamf_username }}
