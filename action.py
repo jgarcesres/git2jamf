@@ -96,10 +96,11 @@ def get_jamf_scripts(scripts = [], page = 0):
     if script_list.status_code in range(200,205):
         script_list = script_list.json()
         print("we have searched {} of {} results".format(len(script_list['results'])+page, script_list['totalCount']))
+        page+=1
         if (page*page_size) < script_list['totalCount']:
             print("seems there's more to grab")
             scripts.extend(script_list['results'])
-            return get_jamf_scripts(scripts, page+1)
+            return get_jamf_scripts(scripts, page)
         else:
             print("reached the end of our search")
             print("retrieved {} total scripts".format(len(scripts)))
@@ -183,7 +184,7 @@ if __name__ == "__main__":
     print('url is: '+url)
     print('workspace dir is: '+workspace_dir)
     print('script_dir is: '+script_dir)
-    print('prefix is: '+prefix)
+    print('branch is: '+prefix)
     print('scripts_extensions are: {}'.format(script_extensions))
 
     #grab the token from jamf
