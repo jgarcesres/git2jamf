@@ -214,7 +214,7 @@ if __name__ == "__main__":
             with open(script, 'r') as upload_script:
                 payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":"{}".format(upload_script.read()) } 
                 create_jamf_script(payload)
-        elif len(script_search == 1):
+        elif len(script_search) == 1:
             print("it does exist, lets update it!")
             #it does exists, lets see if has changed
             with open(script, 'r') as upload_script:
