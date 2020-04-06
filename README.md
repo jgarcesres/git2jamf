@@ -2,7 +2,7 @@
 This action grabs the github work directory (or any of your choice) scans it for scripts and compares them against a pull of all scripts on jamf:
 * If it doesn't exist, it will create it
 * if it exists, it will compare the two and update it in jamf if they differ. Github is always treated as the source.
-* It will add a suffix with the `branch_name_`  to any script that's not part of the master branch
+* It will add a suffix with the `branch name_`  to any script that's not part of the master branch
 ## Inputs
 
 ### `jamf_url`
@@ -19,15 +19,15 @@ This action grabs the github work directory (or any of your choice) scans it for
 
 ### `script_dir`
 
-**optional** the directory where the scripts to upload will be, this would be a subdirectoy in your repository. By default it will try to sync all .sh and .py files from the repo. So it's greatly recommended to provide this input
+**optional** the directory where the scripts to upload will be, this would be a subdirectoy in your repository. By default it will try to sync all .sh and .py files from the repo. So it's greatly recommended to provide this input, this is a regex field so you can potentially look for multiple subdirectories, just provide a name like `**/Scripts` or `**/scripts`
 
 ### `script_extensions`
 
-**optional** the extensions for the types of files we'll be searching for. Defaults to *.sh* and *.py* files. separate each with spaces and no periods. ie `sh py ps1`
+**optional** the extensions for the types of files we'll be searching for. By default it tries to look for *.sh* and *.py* files. To change the behavior, separate each input with spaces and no periods. ie `sh py ps1`
 
-### `branch_name`
+### `prefix_name`
 
-**optional** branch that triggers the action. We'll use this to tag the scripts so multiple branches don't overwrite the same script
+**optional** by default will be the name of the branch that triggers the action. We'll use this to tag the scripts so multiple branches don't overwrite the same script
 
 
 ## Outputs
