@@ -201,7 +201,8 @@ if __name__ == "__main__":
         else:
             print("not the master branch, using the branch name as a suffix")
             #if it's not the master branch then we will use the branch name as a suffix_
-            script_name = "{}_{}".format(suffix.strip('/')[-1],get_script_name(script))
+            suffix = suffix.strip('/')[-1]
+            script_name = "{}_{}".format(suffix,get_script_name(script))
             print("new scripts name: {}".format(script_name))
         #check to see if the script name exists in jamf
         print("now let's see if the scripts we're processing exists in jamf already")
