@@ -4,34 +4,8 @@
 import os
 import glob
 import requests
-import logging
 import jmespath
 import hashlib
-
-#testing
-# from dotenv import load_dotenv
-# load_dotenv()
-
-
-#import getopt 
-# def read_args(argv):
-#     jamf_args= {}
-#     try:
-#         opts, args = getopt.getopt(argv,"hU:u:p:",["url=","username=", "password"])
-#     except getopt.GetoptError:
-#         print 'action.py -U url -u <username> -p <password>'
-#         sys.exit(2)
-#     for opt, arg in opts:
-#         if opt == '-h':
-#             print 'action.py -U url -u <username> -p <password>'
-#             sys.exit()
-#         elif opt in ("-U", "--url"):
-#             jamf_args['url'] = arg
-#         elif opt in ("-u", "--username"):
-#             jamf_args['username'] = arg
-#         elif opt in ("-p", "--password"):
-#             jamf_args['password'] = arg
-#     return jamf_args
 
 
 #function to get the token given the url, usrername and password
