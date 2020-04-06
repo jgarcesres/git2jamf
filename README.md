@@ -19,11 +19,11 @@ It will add a suffix with the `branch_name_`  to any script that's not part of t
 
 ### `script_dir`
 
-**optional** the directory where the scripts to upload will be. Defaults to the github.workdir environment variable
+**optional** the directory where the scripts to upload will be, this would be a subdirectoy in your repository. By default it will try to sync all .sh and .py files from the repo. So it's greatly recommended to provide this input
 
 ### `script_extensions`
 
-**optional** the extensions for the types of files we'll be searching for. Defaults to *.sh* and *.py* files
+**optional** the extensions for the types of files we'll be searching for. Defaults to *.sh* and *.py* files. separate each with spaces and no periods. ie `sh py ps1`
 
 ### `branch_name`
 
@@ -43,9 +43,8 @@ on:
   push:
     branches: 
       - master
-      - juan*
-    # paths:
-    #   - scripts/**
+      - dev*
+      - test*
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
@@ -60,7 +59,4 @@ jobs:
           jamf_username: ${{ secrets.jamf_username }}
           jamf_password: ${{ secrets.jamf_password }}
           script_dir: scripts
-      - name: grab the result
-        run: echo "The result was ${{ steps.jamf_scripts.outputs.result }}"
-
 ```  
