@@ -186,7 +186,7 @@ if __name__ == "__main__":
     print('scripts_extensions are: {}'.format(script_extensions))
 
     #grab the token from jamf
-    pring('grabing the token from jamf')
+    print('grabing the token from jamf')
     token = get_jamf_token(url, username, password)
     print('got the token, checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
