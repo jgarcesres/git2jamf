@@ -183,14 +183,15 @@ if __name__ == "__main__":
     username = os.environ['INPUT_JAMF_USERNAME']
     password = os.environ['INPUT_JAMF_PASSWORD']
     script_dir = os.environ['INPUT_SCRIPT_DIR']
-    workspace_dir = os.environ['GITHUB.WORKSPACE']
+    workspace_dir = os.environ['GITHUB_WORKSPACE']
+    print(os.environ.keys())
     if script_dir != workspace:
         script_dir = '{}/{}'.format(script_dir, workspace_dir)
     suffix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
-    #test()
-    #exit(0)
+    test()
+    exit(0)
     
     #grab the token from jamf
     token = get_jamf_token(url, username, password)
