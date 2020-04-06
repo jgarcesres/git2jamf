@@ -175,14 +175,14 @@ if __name__ == "__main__":
     workspace_dir = os.environ['GITHUB_WORKSPACE']
     if script_dir != workspace_dir:
         script_dir = '{}/{}'.format(workspace_dir,script_dir)
-    suffix = os.environ['INPUT_BRANCH_NAME']
+    prefix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
     
     print('url is: '+url)
     print('workspace dir is: '+workspace_dir)
     print('script_dir is: '+script_dir)
-    print('suffix is: '+suffix)
+    print('prefix is: '+prefix)
     print('scripts_extensions are: {}'.format(script_extensions))
 
     #grab the token from jamf
@@ -194,15 +194,15 @@ if __name__ == "__main__":
     jamf_scripts = get_jamf_scripts()
     
     for script in local_scripts:
-        if 'master' in suffix:
-            print(" we're in the master branch, we won't use the suffix")
+        if 'master' in prefix:
+            print(" we're in the master branch, we won't use the prefix")
             #if this is the master branch we'll go with the vanilla name
             script_name = get_script_name(script)
         else:
-            print("not the master branch, using the branch name as a suffix")
-            #if it's not the master branch then we will use the branch name as a suffix_
-            suffix = suffix.strip('/')[-1]
-            script_name = "{}_{}".format(suffix,get_script_name(script))
+            print("not the master branch, using the branch name as a prefix")
+            #if it's not the master branch then we will use the branch name as a prefix_
+            prefix = prefix.strip('/')[-1]
+            script_name = "{}_{}".format(prefix,get_script_name(script))
             print("new scripts name: {}".format(script_name))
         #check to see if the script name exists in jamf
         print("now let's see if the scripts we're processing exists in jamf already")
