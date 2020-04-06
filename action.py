@@ -169,6 +169,7 @@ def get_script_name(script_path):
 def test():
     print('url is: '+url)
     print('script_dir is: '+script_dir)
+    print('workspace dir is: '+workspace_dir)
     print('suffix is: '+suffix)
     print('scripts_extensions are: {}'.format(script_extensions))
     print("::set-output name=result::{}".format('this ist he result of the test, which seems to have worked?'))
@@ -182,6 +183,9 @@ if __name__ == "__main__":
     username = os.environ['INPUT_JAMF_USERNAME']
     password = os.environ['INPUT_JAMF_PASSWORD']
     script_dir = os.environ['INPUT_SCRIPT_DIR']
+    workspace_dir = os.environ['GTIHUB.WORKSPACE']
+    if script_dir !== workspace:
+        script_dir = '{}/{}'.format(script_dir, workspace_dir)
     suffix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
