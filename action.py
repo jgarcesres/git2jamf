@@ -12,8 +12,6 @@ import hashlib
 # from dotenv import load_dotenv
 # load_dotenv()
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 #import getopt 
 # def read_args(argv):
@@ -40,36 +38,36 @@ logger.setLevel(logging.INFO)
 def get_jamf_token(url, username, password):
     token_request = requests.post(url='{}/uapi/auth/tokens'.format(url), auth = (username, password))
     if token_request.status_code in range(200, 203):
-        logger.info("got the token! it expires in: {}".format(token_request.json()['expires']))
+        print("got the token! it expires in: {}".format(token_request.json()['expires']))
         return token_request.json()['token']
     elif token_request.status_code == 404:
         print("::set-output name=result::{}".format('bad request, check your url'))
-        logger.warn('failed to retrieve a valid token, please check the url')   
+        print('failed to retrieve a valid token, please check the url')   
     elif token_request.status_code == 401:
         print("::set-output name=result::{}".format('credentials are invalid, please doublecheck them'))
-        logger.warn('failed to retrieve a valid token, please check the credentials')      
+        print('failed to retrieve a valid token, please check the credentials')      
     else:
         print("::set-output name=result::{}".format('failed to retrieve the token'))
-        logger.warn('failed to retrieve a valid token')
-        logger.warn(token_request.text)
+        print('failed to retrieve a valid token')
+        print(token_request.text)
 
 #function to invalidate a token so it can't be use after we're done
 def invalidate_jamf_token():
     header = { "Authorization": "Bearer {}".format(token) }
     token_request = requests.post(url='{}/uapi/auth/invalidateToken'.format(), headers=header)
     if token_request.status_code in range(200, 300):
-        logger.info("token invalidated succesfully")
+        print("token invalidated succesfully")
         return True
     else:
-        logger.warn("failed to invalidate the token, maybe it's already expired?")
-        logger.warn(token_request.text)
+        print("failed to invalidate the token, maybe it's already expired?")
+        print(token_request.text)
 
 #function to update an already existing script
 def update_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
     if script_request.status_code in range(200, 300):
-        logger.info("script succesfully")
+        print("script succesfully")
         return True
     else:
         print("::set-output name=result::{}".format('failed to update script: {}'.format(payload['name'])))
@@ -81,7 +79,7 @@ def create_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.post(url='{}/uapi/v1/scripts'.format(url), headers=header, json=payload)
     if script_request.status_code in range(200, 300):
-        logger.info("script created")
+        print("script created")
         return True
     else:
         print("::set-output name=result::{}".format('failed to update script: {}'.format(payload['name'])))
@@ -108,9 +106,9 @@ def get_jamf_scripts(scripts = [], page = 0):
             return scripts
     else:
         print("::set-output name=result::{}".format('failed to retrieve scripts from jamf'))
-        logger.warning("status code: {}".format(script_list.status_code))
-        logger.warning("error retrevieving script list")
-        logger.warning(token_request.text)
+        print("status code: {}".format(script_list.status_code))
+        print("error retrevieving script list")
+        print(token_request.text)
         exit(1)
 
 
@@ -135,9 +133,9 @@ def find_jamf_script(script_name, page = 0):
             return "n/a"
     else:
         print("::set-output name=result::{}".format('failed to retrieve script from jamf'))
-        logger.warning("status code: {}".format(script_list.status_code))
-        logger.warning("error retrevieving script list")
-        logger.warning(token_request.text)
+        print("status code: {}".format(script_list.status_code))
+        print("error retrevieving script list")
+        print(token_request.text)
         exit(1)
 
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
@@ -166,18 +164,9 @@ def get_script_name(script_path):
     return script_path.split('/')[-1].split('.')[0]
 
 
-def test():
-    print('url is: '+url)
-    print('script_dir is: '+script_dir)
-    print('workspace dir is: '+workspace_dir)
-    print('suffix is: '+suffix)
-    print('scripts_extensions are: {}'.format(script_extensions))
-    print("::set-output name=result::{}".format('this ist he result of the test, which seems to have worked?'))
-    local_scripts = find_local_scripts(script_dir, script_extensions)
-
-
 
 if __name__ == "__main__":
+    print('reading environment variables')
     #jamf_args = read_args(sys.argv[1:])
     url = os.environ['INPUT_JAMF_URL']
     username = os.environ['INPUT_JAMF_USERNAME']
@@ -185,31 +174,46 @@ if __name__ == "__main__":
     script_dir = os.environ['INPUT_SCRIPT_DIR']
     workspace_dir = os.environ['GITHUB_WORKSPACE']
     if script_dir != workspace_dir:
-        script_dir = '{}/{}'.format(script_dir, workspace_dir)
+        script_dir = '{}/{}'.format(workspace_dir,script_dir)
     suffix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
     
+    print('url is: '+url)
+    print('workspace dir is: '+workspace_dir)
+    print('script_dir is: '+script_dir)
+    print('suffix is: '+suffix)
+    print('scripts_extensions are: {}'.format(script_extensions))
+
     #grab the token from jamf
+    pring('grabing the token from jamf')
     token = get_jamf_token(url, username, password)
+    print('got the token, checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
+    print('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
     
     for script in local_scripts:
         if 'master' in suffix:
+            print(" we're in the master branch, we won't use the suffix")
             #if this is the master branch we'll go with the vanilla name
             script_name = get_script_name(script)
         else:
+            print("not the master branch, using the branch name as a suffix")
             #if it's not the master branch then we will use the branch name as a suffix_
             script_name = "{}_{}".format(suffix.strip('/')[0],get_script_name(script))
+            print("new scripts name: {}".format(script_name))
         #check to see if the script name exists in jamf
+        print("now let's see if the scripts we're processing exists in jamf already")
         script_search = jmespath.search("[?name == '{}']".format(script_name), jamf_scripts)
         if len(script_search) == 0:
+            print("doesn't exist, lets create it")
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
                 payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":"{}".format(upload_script.read()) } 
                 create_jamf_script(payload)
         elif len(script_search == 1):
+            print("it does exist, lets update it!")
             #it does exists, lets see if has changed
             with open(script, 'r') as upload_script:
                 script_text = upload_script.read()
