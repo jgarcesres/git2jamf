@@ -171,12 +171,12 @@ if __name__ == "__main__":
             print("excluded: {}".format(script))
             excluded_scripts.append(script)
 
-
     print('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
-    print('setting all script names to lower case to avoid false positives')
-    for script in jamf_scripts:
-        script['name'] =script['name'].lower() 
+    print("setting all script names to lower case to avoid false positives in our search. \n Worry not, this won't affect the actual naming")
+    lower_case_jamf_scripts = jamf_scripts
+    for script in lower_case_jamf_scripts:
+        lower_case_jamf_scripts['name'] =script['name'].lower() 
     print("got the list from jamf")
     print("processing each script now")
     for count, script in enumerate(local_scripts):
@@ -199,7 +199,7 @@ if __name__ == "__main__":
             print("new scripts name: {}".format(script_name))
         #check to see if the script name exists in jamf
         print("now let's see if the scripts we're processing exists in jamf already")
-        script_search = jmespath.search("[?name == '{}']".format(script_name.lower()), jamf_scripts)
+        script_search = jmespath.search("[?name == '{}']".format(script_name.lower()), lower_case_jamf_scripts)
         if len(script_search) == 0:
             print("doesn't exist, lets create it")
             #it doesn't exist, we can create it
@@ -207,6 +207,8 @@ if __name__ == "__main__":
                 payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":"{}".format(upload_script.read()) } 
                 create_jamf_script(payload)
         elif len(script_search) == 1:
+            jamf_script = script_search.pop()
+            script_search = jmespath.search("[?id == '{}']".format(jamf_script['id']), jamf_scripts)
             jamf_script = script_search.pop()
             print("it does exist, lets update it!")
             #it does exists, lets see if has changed
