@@ -119,7 +119,7 @@ def find_jamf_script(script_name, page = 0):
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
     script_list = requests.get(url='{}/uapi/v1/scripts'.format(url), headers=header, params=params)
-    if script_list.status_code in [200, 201]]:
+    if script_list.status_code in range(200, 205):
         script_list = script_list.json()
         print("we have searched {} of {} results".format(len(script_list['results'])+page, script_list['totalCount']))
         script_search = jmespath.search("results[?name == '{}']".format(script_name), script_list)
