@@ -170,7 +170,7 @@ def test():
     print('url is: '+url)
     print('script_dir is: '+script_dir)
     print('suffix is: '+suffix)
-    print('scripts_extensions are:'+ script_extensions)
+    print('scripts_extensions are: {}'.format(script_extensions))
     print("::set-output name=result::{}".format('this ist he result of the test, which seems to have worked?'))
     local_scripts = find_local_scripts(script_dir, script_extensions)
 
