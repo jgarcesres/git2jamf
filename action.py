@@ -15,13 +15,10 @@ def get_jamf_token(url, username, password):
         print("got the token! it expires in: {}".format(token_request.json()['expires']))
         return token_request.json()['token']
     elif token_request.status_code == 404:
-        print("::set-output name=result::{}".format('bad request, check your url'))
         print('failed to retrieve a valid token, please check the url')   
     elif token_request.status_code == 401:
-        print("::set-output name=result::{}".format('credentials are invalid, please doublecheck them'))
         print('failed to retrieve a valid token, please check the credentials')      
     else:
-        print("::set-output name=result::{}".format('failed to retrieve the token'))
         print('failed to retrieve a valid token')
         print(token_request.text)
 
@@ -44,9 +41,8 @@ def update_jamf_script(payload):
         print("script was updated succesfully")
         return True
     else:
-        print("::set-output name=result::{}".format('failed to update script: {}'.format(payload['name'])))
         print("failed to update the script")
-        print(script_request.content)
+        print(script_request.text)
 
 #function to create a new script
 def create_jamf_script(payload):
@@ -56,9 +52,8 @@ def create_jamf_script(payload):
         print("script created")
         return True
     else:
-        print("::set-output name=result::{}".format('failed to update script: {}'.format(payload['name'])))
         print("failed to create the sript")
-        print(script_request.content)
+        print(script_request.text)
 
 
 #retrieves all scripts in a json
@@ -81,7 +76,6 @@ def get_jamf_scripts(scripts = [], page = 0):
             print("retrieved {} total scripts".format(len(scripts)))
             return scripts
     else:
-        print("::set-output name=result::{}".format('failed to retrieve scripts from jamf'))
         print("status code: {}".format(script_list.status_code))
         print("error retrevieving script list")
         print(script_list.text)
@@ -108,7 +102,6 @@ def find_jamf_script(script_name, page = 0):
             print("did not find any script named {}".format(script_name))
             return "n/a"
     else:
-        print("::set-output name=result::{}".format('failed to retrieve script from jamf'))
         print("status code: {}".format(script_list.status_code))
         print("error retrevieving script list")
         print(script_list.text)
@@ -154,11 +147,11 @@ if __name__ == "__main__":
     prefix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
-    
-    print('url is: '+url)
-    print('workspace dir is: '+workspace_dir)
-    print('script_dir is: '+script_dir)
-    print('branch is: '+prefix)
+    excluded_scripts = []
+    print('url is: ' + url)
+    print('workspace dir is: ' + workspace_dir)
+    print('script_dir is: ' + script_dir)
+    print('branch is: ' + prefix)
     print('scripts_extensions are: {}'.format(script_extensions))
 
     #grab the token from jamf
@@ -166,27 +159,47 @@ if __name__ == "__main__":
     token = get_jamf_token(url, username, password)
     print('got the token, checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
+    #I need to simplify this array down to the just the name of the script and compare to avoid dupes
+    simple_name_local_scripts = local_scripts
+    for script in simple_name_local_scripts:
+        script = get_script_name(script).lower()
+    print('doublechecking for duplicate names. if we have any, they will be excluded')
+    for script in simple_name_local_scripts:
+        search = jmespath.search("[?name == '{}']".format(script))
+        if search >= 2:
+            print("found a conflicting script name, please resolve it. it will be excluded from this run")
+            print("excluded: {}".format(script))
+            excluded_scripts.append(script)
+
+
     print('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
+    print('setting all script names to lower case to avoid false positives')
+    for script in jamf_scripts:
+        script['name'] =script['name'].lower() 
     print("got the list from jamf")
     print("processing each script now")
     for count, script in enumerate(local_scripts):
         print("----------------------")
         print("script {} of {} ".format(count+1, len(local_scripts)))
-        if 'master' in prefix:
+        script_name = get_script_name(script)
+        if script_name.lower() in excluded_scripts:
+            print('this is one of the excluded scripts, skipping {}'.format(script_name))
+            print('full path of the script is {}'.format(script))
+            continue
+        elif 'master' in prefix:
             print(" we're in the master branch, we won't use the prefix")
             #if this is the master branch we'll go with the vanilla name
-            script_name = get_script_name(script)
             print("script name is: {}".format(script_name))
         else:
             print("not the master branch, using the branch name as a prefix")
             #if it's not the master branch then we will use the branch name as a prefix_
             prefix = prefix.split('/')[-1]
-            script_name = "{}_{}".format(prefix,get_script_name(script))
+            script_name = "{}_{}".format(prefix,script_name)
             print("new scripts name: {}".format(script_name))
         #check to see if the script name exists in jamf
         print("now let's see if the scripts we're processing exists in jamf already")
-        script_search = jmespath.search("[?name == '{}']".format(script_name), jamf_scripts)
+        script_search = jmespath.search("[?name == '{}']".format(script_name.lower()), jamf_scripts)
         if len(script_search) == 0:
             print("doesn't exist, lets create it")
             #it doesn't exist, we can create it
