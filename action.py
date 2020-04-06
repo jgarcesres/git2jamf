@@ -110,7 +110,7 @@ def get_jamf_scripts(scripts = [], page = 0):
         print("::set-output name=result::{}".format('failed to retrieve scripts from jamf'))
         print("status code: {}".format(script_list.status_code))
         print("error retrevieving script list")
-        print(token_request.text)
+        print(script_list.text)
         exit(1)
 
 
