@@ -198,6 +198,7 @@ if __name__ == "__main__":
             print(" we're in the master branch, we won't use the prefix")
             #if this is the master branch we'll go with the vanilla name
             script_name = get_script_name(script)
+            print("script name is: {}".format(script_name))
         else:
             print("not the master branch, using the branch name as a prefix")
             #if it's not the master branch then we will use the branch name as a prefix_
@@ -219,9 +220,12 @@ if __name__ == "__main__":
             with open(script, 'r') as upload_script:
                 script_text = upload_script.read()
                 if not compare_scripts(script_text, script_search[0]['scriptContents']):
+                    print("the local version is different than the one in jamf, updating jamf")
                     #the hash of the scripts is not the same, so we'll update it
                     script['scriptContents'] =  "{}".format(script_text)
                     update_jamf_script(script)
+                else:
+                    print("since the scripts are still the same, we're skipping this one.")
     
 
 
