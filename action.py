@@ -184,7 +184,7 @@ if __name__ == "__main__":
     password = os.environ['INPUT_JAMF_PASSWORD']
     script_dir = os.environ['INPUT_SCRIPT_DIR']
     workspace_dir = os.environ['GTIHUB.WORKSPACE']
-    if script_dir !== workspace:
+    if script_dir != workspace:
         script_dir = '{}/{}'.format(script_dir, workspace_dir)
     suffix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
