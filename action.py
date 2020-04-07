@@ -163,7 +163,6 @@ if __name__ == "__main__":
     prefix = os.environ['INPUT_BRANCH_NAME']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
-    excluded_scripts = []
     logger.info('url is: ' + url)
     logger.info('workspace dir is: ' + workspace_dir)
     logger.info('script_dir is: ' + script_dir)
@@ -179,14 +178,13 @@ if __name__ == "__main__":
     simple_name_local_scripts = []
     for script in local_scripts:
         simple_name_local_scripts.append(get_script_name(script).lower())
-    logger.info('doublechecking for duplicate names. if we have any, they will be excluded')
+    logger.info('doublechecking for duplicate names')
     for script in simple_name_local_scripts:
         search = jmespath.search("[?name == '{}']".format(script), simple_name_local_scripts)
         if len(search) >= 2:
-            logger.warning("found a conflicting script name, please resolve it. it will be excluded from this run")
-            logger.warning("excluded: {}".format(script))
-            excluded_scripts.append(script)
-    logger.info("list of excluded scripts {}".format(excluded_scripts))
+            logger.warning("found a conflicting script name, please resolve it.")
+            logger.warning(search)
+            raise("Found scripts with duplicates name in the repository, please resolve")
     logger.info('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
     logger.info("setting all script names to lower case to avoid false positives in our search. \n Worry not, this won't affect the actual naming :)")
@@ -197,11 +195,7 @@ if __name__ == "__main__":
         logger.info("----------------------")
         logger.info("script {} of {} ".format(count+1, len(local_scripts)))
         script_name = get_script_name(script)
-        if script_name.lower() in excluded_scripts:
-            logger.info('this is one of the excluded scripts, skipping {}'.format(script_name))
-            logger.info('full path of the script is {}'.format(script))
-            continue
-        elif 'master' in prefix:
+        if 'master' in prefix:
             logger.info(" we're in the master branch, we won't use the prefix")
             #if this is the master branch we'll go with the vanilla name
             logger.info("script name is: {}".format(script_name))
