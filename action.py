@@ -34,8 +34,7 @@ def get_jamf_token(url, username, password):
 def invalidate_jamf_token():
     header = { "Authorization": "Bearer {}".format(token) }
     token_request = requests.post(url='{}/uapi/auth/invalidateToken'.format(url), headers=header)
-    if token_request.status_code in range(200, 300):
-        logger.info('tokens invalidation status code: {}',token_request.status_code)
+    if token_request.status_code == 204:
         logger.success("token invalidated succesfully")
         return True
     else:
@@ -48,6 +47,7 @@ def update_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
     if script_request.status_code in range (200, 203):
+        logger.info("status code for put: {}", script_request.status_code)
         logger.success("script was updated succesfully")
         return True
     else:
@@ -60,6 +60,7 @@ def create_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.post(url='{}/uapi/v1/scripts'.format(url), headers=header, json=payload)
     if script_request.status_code in range(200, 203):
+        logger.info("status code for put: {}", script_request.status_code)
         logger.success("script created")
         return True
     else:
