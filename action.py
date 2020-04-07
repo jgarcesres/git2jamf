@@ -160,9 +160,9 @@ if __name__ == "__main__":
     print('got the token, checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
     #I need to simplify this array down to the just the name of the script and compare to avoid dupes
-    simple_name_local_scripts = local_scripts
-    for script in simple_name_local_scripts:
-        script = get_script_name(script).lower()
+    simple_name_local_scripts = []
+    for script in local_scripts:
+        simple_name_local_scripts.append(get_script_name(script).lower())
     print('doublechecking for duplicate names. if we have any, they will be excluded')
     for script in simple_name_local_scripts:
         search = jmespath.search("[?name == '{}']".format(script), simple_name_local_scripts)
@@ -170,13 +170,12 @@ if __name__ == "__main__":
             print("found a conflicting script name, please resolve it. it will be excluded from this run")
             print("excluded: {}".format(script))
             excluded_scripts.append(script)
-
+    print("list of excluded scripts {}".format(excluded_scripts))
     print('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
-    print("setting all script names to lower case to avoid false positives in our search. \n Worry not, this won't affect the actual naming")
-    lower_case_jamf_scripts = jamf_scripts
-    for script in lower_case_jamf_scripts:
-        script['name'] = script['name'].lower() 
+    print("setting all script names to lower case to avoid false positives in our search. \n Worry not, this won't affect the actual naming :)")
+    for script in jamf_scripts:
+        script['lower_case_name'] = script['name'].lower() 
     print("got the list from jamf")
     print("processing each script now")
     for count, script in enumerate(local_scripts):
@@ -199,7 +198,7 @@ if __name__ == "__main__":
             print("new scripts name: {}".format(script_name))
         #check to see if the script name exists in jamf
         print("now let's see if the scripts we're processing exists in jamf already")
-        script_search = jmespath.search("[?name == '{}']".format(script_name.lower()), lower_case_jamf_scripts)
+        script_search = jmespath.search("[?lower_case_name == '{}']".format(script_name.lower()), jamf_scripts)
         if len(script_search) == 0:
             print("doesn't exist, lets create it")
             #it doesn't exist, we can create it
@@ -208,8 +207,7 @@ if __name__ == "__main__":
                 create_jamf_script(payload)
         elif len(script_search) == 1:
             jamf_script = script_search.pop()
-            script_search = jmespath.search("[?id == '{}']".format(jamf_script['id']), jamf_scripts)
-            jamf_script = script_search.pop()
+            del jamf_script['lower_case_name']
             print("it does exist, lets update it!")
             #it does exists, lets see if has changed
             with open(script, 'r') as upload_script:
