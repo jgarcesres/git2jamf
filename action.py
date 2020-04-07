@@ -8,10 +8,10 @@ import jmespath
 import hashlib
 import sys
 from loguru import logger
-from logging import StreamHandler
 
-logger.add(StreamHandler(sys.stderr), colorize=True format="<red>{time}</red> <level>{message}</level>")
-logger.add(StreamHandler(sys.stdout), colorize=True format="<blue>{time}</blue> <level>{message}</level>")
+logger.remove()
+logger.add(StreamHandler(sys.stderr), colorize=True, level="ERROR", format="<red>{time}</red> <level>{message}</level>")
+logger.add(StreamHandler(sys.stdout), colorize=True, level="INFO", format="<blue>{time}</blue> <level>{message}</level>")
 
 #function to get the token given the url, usrername and password
 def get_jamf_token(url, username, password):
