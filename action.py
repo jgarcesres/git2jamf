@@ -9,10 +9,10 @@ import hashlib
 import sys
 from loguru import logger
 
-#logger.remove()
-#logger.add(sys.stderr, colorize=True, level="ERROR", format="<red>{time}</red> <level>{message}</level>")
-#logger.add(sys.stderr, colorize=True, level="WARNING", format="<magenta>{time}</magenta> <level>{message}</level>")
-#logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time}</blue> <level>{message}</level>")
+logger.remove()
+logger.add(sys.stderr, colorize=True, level="ERROR", format="<blue>{time}</blue> {level}: <red>{message}</red>")
+logger.add(sys.stderr, colorize=True, level="WARNING", format="<blue>{time}</blue> {level}: <magenta>{message}</magenta>")
+logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time}</blue> {level}: <white>{message}</white>")
 
 
 #function to get the token given the url, usrername and password
@@ -179,18 +179,21 @@ if __name__ == "__main__":
     simple_name_local_scripts = []
     for script in local_scripts:
         simple_name_local_scripts.append(get_script_name(script).lower())
-    logger.info('doublechecking for duplicate names')
+    
+    logger.info('Doublechecking for duplicate names')
     for script in simple_name_local_scripts:
-        search = jmespath.search("[?name == '{}']".format(script), simple_name_local_scripts)
-        if len(search) >= 2:
-            logger.error("found a conflicting script name, please resolve it.")
-            logger.error(search)
+        if simple_name_local_scripts.count(script) >= 2:
+            logger.error("Script_name: {} conflicts with another in your repository, please resolve it.", script)
             raise("Found scripts with duplicates name in the repository, please resolve")
+    
+    logger.success("found no duplicate script names, we can continue")
     logger.info('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
     logger.info("setting all script names to lower case to avoid false positives in our search. \n Worry not, this won't affect the actual naming :)")
+    
     for script in jamf_scripts:
         script['lower_case_name'] = script['name'].lower() 
+    
     logger.info("processing each script now")
     for count, script in enumerate(local_scripts):
         logger.info("----------------------")
@@ -203,9 +206,9 @@ if __name__ == "__main__":
             logger.info("Prefix enabled")
             prefix = prefix.split('/')[-1]
             script_name = "{}_{}".format(prefix,script_name)
-            logger.info("new scripts name: {}".format(script_name))
+            logger.info("New script name: {}".format(script_name))
         #check to see if the script name exists in jamf
-        logger.info("now let's see if the scripts we're processing exists in jamf already")
+        logger.info("Now let's see if {} exists in jamf already", script_name)
         script_search = jmespath.search("[?lower_case_name == '{}']".format(script_name.lower()), jamf_scripts)
         if len(script_search) == 0:
             logger.info("doesn't exist, lets create it")
