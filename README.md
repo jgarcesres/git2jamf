@@ -27,12 +27,7 @@ This action grabs the github work directory (or any of your choice) scans it for
 
 ### `enable_prefix`
 
-**optional** by default this will be `true`, it will add the branch name as a prefix to the script before uploading it. You can disable this or also change the prefix altogether. You probably want to disable this for pushes to your `master` so it can send a clean file name to your production instance.
-
-### `prefix_name`
-
-**optional** by default will be the name of the branch that triggers the action. We'll use this to tag the scripts so multiple branches don't overwrite the same script
-
+**optional** by default this will be `true`, it will add the branch name as a prefix to the script before uploading it. You probably want to disable this for pushes to your `master` so it can send a clean file name to your production instance.
 
 ## Outputs
 

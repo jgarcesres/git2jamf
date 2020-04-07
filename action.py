@@ -10,7 +10,7 @@ import sys
 from loguru import logger
 
 logger.remove()
-logger.add(sys.stderr, colorize=True, level="ERROR", format="<red>{time:HH:mm:ss!UTC}</red> {function}: <lvl>{message}</lvl>")
+#logger.add(sys.stderr, colorize=True, level="ERROR", format="<red>{time:HH:mm:ss!UTC}</red> {function}: <lvl>{message}</lvl>")
 logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss!UTC}</blue>: <lvl>{message}</lvl>")
 
 
@@ -46,12 +46,12 @@ def invalidate_jamf_token():
 def update_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
-    if script_request.status_code in range (200, 203):
-        logger.info("status code for put: {}", script_request.status_code)
+    if script_request.status_code in range (200, 202):
         logger.success("script was updated succesfully")
         return True
     else:
         logger.warning("failed to update the script")
+        logger.debug("status code for put: {}", script_request.status_code)
         logger.warning(script_request.text)
 
 #function to create a new script
@@ -59,7 +59,7 @@ def update_jamf_script(payload):
 def create_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.post(url='{}/uapi/v1/scripts'.format(url), headers=header, json=payload)
-    if script_request.status_code in range(200, 203):
+    if script_request.status_code == 201:
         logger.info("status code for put: {}", script_request.status_code)
         logger.success("script created")
         return True
@@ -124,13 +124,15 @@ def find_jamf_script(script_name, page = 0):
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
 @logger.catch
 def compare_scripts(new, old):
-    md5_new = hashlib.md5(new.encode()) 
+    md5_new = hashlib.md5(new.encode())
+    logger.info("hash of the of local file: {}", md5_new) 
     md5_old = hashlib.md5(old.encode())
+    logger.info("hash of the of local file: {}", md5_old) 
     if md5_new.hexdigest() == md5_old.hexdigest():
         logger.info("scripts are the same")
         return True
     else:
-        logger.info("scripts are different")
+        logger.warning("scripts are different")
         return False
 
 #retrieves list of files given a folder path and the list of valid file extensions to look for
@@ -170,6 +172,10 @@ if __name__ == "__main__":
     logger.info('script_dir is: ' + script_dir)
     logger.info('branch is: ' + prefix)
     logger.info('scripts_extensions are: {}'.format(script_extensions))
+    if enable_prefix == False:
+        logger.warning("prefix is disabled")
+    else:
+        logger.warning("prefix is enabled")
 
     logger.info('checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
@@ -202,18 +208,18 @@ if __name__ == "__main__":
         logger.info("script {} of {} ".format(count+1, len(local_scripts)))
         script_name = get_script_name(script)
         if enable_prefix == False:
-            logger.info("prefix disabled")
+            #don't use the prefix
             logger.info("script name is: {}".format(script_name))
         else:
-            logger.info("prefix enabled")
+            #use the prefix
             prefix = prefix.split('/')[-1]
             script_name = "{}_{}".format(prefix,script_name)
-            logger.info("new script name: {}".format(script_name))
+            logger.info("the new script name: {}".format(script_name))
         #check to see if the script name exists in jamf
         logger.info("now let's see if {} exists in jamf already", script_name)
         script_search = jmespath.search("[?lower_case_name == '{}']".format(script_name.lower()), jamf_scripts)
         if len(script_search) == 0:
-            logger.info("doesn't exist, lets create it")
+            logger.info("it doesn't exist, lets create it")
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
                 payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":"{}".format(upload_script.read()) } 
@@ -231,7 +237,7 @@ if __name__ == "__main__":
                     jamf_script['scriptContents'] = script_text
                     update_jamf_script(jamf_script)
                 else:
-                    logger.info("since the scripts are still the same, we're skipping this one.")
+                    logger.info("since they are the same, we're skipping this one.")
     
     logger.info("expiring the token so it can't be used further")
     invalidate_jamf_token()
