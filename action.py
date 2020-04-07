@@ -11,7 +11,7 @@ from loguru import logger
 
 
 logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>")
-logger.add(sys.stdout, colorize=True, format="<red>{time}</red> <level>{message}</level>")
+logger.add(sys.stderr, colorize=True, format="<red>{time}</red> <level>{message}</level>")
 #logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO")
 
 #function to get the token given the url, usrername and password
