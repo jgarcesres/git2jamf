@@ -173,7 +173,7 @@ if __name__ == "__main__":
     #grab the token from jamf
     logger.info('grabing the token from jamf')
     token = get_jamf_token(url, username, password)
-    logger.info('got the token, checking the list of local scripts to upload or create')
+    logger.info('checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
     #I need to simplify this array down to the just the name of the script and compare to avoid dupes
     simple_name_local_scripts = []
@@ -192,7 +192,6 @@ if __name__ == "__main__":
     logger.info("setting all script names to lower case to avoid false positives in our search. \n Worry not, this won't affect the actual naming :)")
     for script in jamf_scripts:
         script['lower_case_name'] = script['name'].lower() 
-    logger.info("got the list from jamf")
     logger.info("processing each script now")
     for count, script in enumerate(local_scripts):
         logger.info("----------------------")
