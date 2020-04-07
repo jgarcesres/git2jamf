@@ -10,9 +10,8 @@ import sys
 from loguru import logger
 
 logger.remove()
-logger.add(sys.stderr, colorize=True, level="ERROR", format="<blue>{time}</blue> {level}: <red>{message}</red>")
-logger.add(sys.stderr, colorize=True, level="WARNING", format="<blue>{time}</blue> {level}: <magenta>{message}</magenta>")
-logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time}</blue> {level}: <white>{message}</white>")
+logger.add(sys.stderr, colorize=True, level="ERROR", format="<orange>{time}</blue> {function}: <lvl>{message}</lvl>")
+logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time}</blue>: <lvl>{message}</lvl>")
 
 
 #function to get the token given the url, usrername and password
@@ -219,7 +218,7 @@ if __name__ == "__main__":
         elif len(script_search) == 1:
             jamf_script = script_search.pop()
             del jamf_script['lower_case_name']
-            logger.info("it does exist, lets update it!")
+            logger.info("it does exist, lets compare them")
             #it does exists, lets see if has changed
             with open(script, 'r') as upload_script:
                 script_text = upload_script.read()
