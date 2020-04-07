@@ -18,7 +18,7 @@ logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss
 @logger.catch
 def get_jamf_token(url, username, password):
     token_request = requests.post(url='{}/uapi/auth/tokens'.format(url), auth = (username, password))
-    if token_request.status_code in range(200, 203):
+    if token_request.status_code == 200:
         logger.success("got the token! it expires in: {}".format(token_request.json()['expires']))
         return token_request.json()['token']
     elif token_request.status_code == 404:
@@ -34,7 +34,7 @@ def get_jamf_token(url, username, password):
 def invalidate_jamf_token():
     header = { "Authorization": "Bearer {}".format(token) }
     token_request = requests.post(url='{}/uapi/auth/invalidateToken'.format(url), headers=header)
-    if token_request.status_code in range(200, 300):
+    if token_request.status_code in range(200, 203):
         logger.success("token invalidated succesfully")
         return True
     else:
@@ -46,7 +46,7 @@ def invalidate_jamf_token():
 def update_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
-    if script_request.status_code in range(200, 300):
+    if script_request.status_code == 201:
         logger.success("script was updated succesfully")
         return True
     else:
@@ -58,7 +58,7 @@ def update_jamf_script(payload):
 def create_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.post(url='{}/uapi/v1/scripts'.format(url), headers=header, json=payload)
-    if script_request.status_code in range(200, 300):
+    if script_request.status_code in range(200, 202):
         logger.success("script created")
         return True
     else:
@@ -73,7 +73,7 @@ def get_jamf_scripts(scripts = [], page = 0):
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
     script_list = requests.get(url='{}/uapi/v1/scripts'.format(url), headers=header, params=params)
-    if script_list.status_code in range(200,205):
+    if script_list.status_code == 200:
         script_list = script_list.json()
         logger.info("we have searched {} of {} results".format(len(script_list['results'])+page, script_list['totalCount']))
         page+=1
@@ -100,7 +100,7 @@ def find_jamf_script(script_name, page = 0):
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
     script_list = requests.get(url='{}/uapi/v1/scripts'.format(url), headers=header, params=params)
-    if script_list.status_code in range(200, 205):
+    if script_list.status_code == 200:
         script_list = script_list.json()
         logger.info("we have searched {} of {} results".format(len(script_list['results'])+page, script_list['totalCount']))
         script_search = jmespath.search("results[?name == '{}']".format(script_name), script_list)
