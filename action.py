@@ -9,9 +9,10 @@ import hashlib
 import sys
 from loguru import logger
 
-logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO")
-logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>")
 
+logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>")
+logger.add(sys.stdout, colorize=True, format="<red>{time}</red> <level>{message}</level>")
+#logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO")
 
 #function to get the token given the url, usrername and password
 def get_jamf_token(url, username, password):
@@ -20,12 +21,12 @@ def get_jamf_token(url, username, password):
         logger.info("got the token! it expires in: {}".format(token_request.json()['expires']))
         return token_request.json()['token']
     elif token_request.status_code == 404:
-        logger.warn('failed to retrieve a valid token, please check the url')   
+        logger.warning('failed to retrieve a valid token, please check the url')   
     elif token_request.status_code == 401:
-        logger.warn('failed to retrieve a valid token, please check the credentials')      
+        logger.warning('failed to retrieve a valid token, please check the credentials')      
     else:
-        logger.warn('failed to retrieve a valid token')
-        logger.warn(token_request.text)
+        logger.warning('failed to retrieve a valid token')
+        logger.warning(token_request.text)
 
 #function to invalidate a token so it can't be use after we're done
 def invalidate_jamf_token():
@@ -35,7 +36,7 @@ def invalidate_jamf_token():
         logger.info("token invalidated succesfully")
         return True
     else:
-        logger.warn("failed to invalidate the token, maybe it's already expired?")
+        logger.warning("failed to invalidate the token, maybe it's already expired?")
         print(token_request.text)
 
 #function to update an already existing script
@@ -46,7 +47,7 @@ def update_jamf_script(payload):
         logger.info("script was updated succesfully")
         return True
     else:
-        logger.warn("failed to update the script")
+        logger.warning("failed to update the script")
         print(script_request.text)
 
 #function to create a new script
@@ -57,8 +58,8 @@ def create_jamf_script(payload):
         logger.info("script created")
         return True
     else:
-        logger.warn("failed to create the sript")
-        logger.warn(script_request.text)
+        logger.warning("failed to create the sript")
+        logger.warning(script_request.text)
 
 
 #retrieves all scripts in a json
@@ -81,9 +82,9 @@ def get_jamf_scripts(scripts = [], page = 0):
             logger.info("retrieved {} total scripts".format(len(scripts)))
             return scripts
     else:
-        logger.warn("status code: {}".format(script_list.status_code))
-        logger.warn("error retrevieving script list")
-        logger.warn(script_list.text)
+        logger.warning("status code: {}".format(script_list.status_code))
+        logger.warning("error retrevieving script list")
+        logger.warning(script_list.text)
         exit(1)
 
 
@@ -107,9 +108,9 @@ def find_jamf_script(script_name, page = 0):
             logger.info("did not find any script named {}".format(script_name))
             return "n/a"
     else:
-        logger.warn("status code: {}".format(script_list.status_code))
-        logger.warn("error retrevieving script list")
-        logger.warn(script_list.text)
+        logger.warning("status code: {}".format(script_list.status_code))
+        logger.warning("error retrevieving script list")
+        logger.warning(script_list.text)
         exit(1)
 
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
@@ -172,8 +173,8 @@ if __name__ == "__main__":
     for script in simple_name_local_scripts:
         search = jmespath.search("[?name == '{}']".format(script), simple_name_local_scripts)
         if len(search) >= 2:
-            logger.warn("found a conflicting script name, please resolve it. it will be excluded from this run")
-            logger.warn("excluded: {}".format(script))
+            logger.warning("found a conflicting script name, please resolve it. it will be excluded from this run")
+            logger.warning("excluded: {}".format(script))
             excluded_scripts.append(script)
     logger.info("list of excluded scripts {}".format(excluded_scripts))
     logger.info('now checking against jamf for the list of scripts')
