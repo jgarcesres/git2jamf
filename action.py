@@ -11,6 +11,7 @@ from loguru import logger
 
 logger.remove()
 logger.add(sys.stderr, colorize=True, level="ERROR", format="<red>{time}</red> <level>{message}</level>")
+logger.add(sys.stderr, colorize=True, level="WARNING", format="<magenta>{time}</magenta> <level>{message}</level>")
 logger.add(sys.stderr, colorize=True, level="INFO", format="<blue>{time}</blue> <level>{message}</level>")
 
 #function to get the token given the url, usrername and password
@@ -36,7 +37,7 @@ def invalidate_jamf_token():
         return True
     else:
         logger.warning("failed to invalidate the token, maybe it's already expired?")
-        print(token_request.text)
+        logger.warning(token_request.text)
 
 #function to update an already existing script
 def update_jamf_script(payload):
@@ -47,7 +48,7 @@ def update_jamf_script(payload):
         return True
     else:
         logger.warning("failed to update the script")
-        print(script_request.text)
+        logger.warning(script_request.text)
 
 #function to create a new script
 def create_jamf_script(payload):
@@ -129,8 +130,8 @@ def find_local_scripts(script_dir, script_extensions):
     logger.info('searching for files ending in {} in {}'.format(script_extensions, script_dir))
     for file_type in script_extensions:
         script_list.extend(glob.glob('{}/**/*.{}'.format(script_dir, file_type), recursive = True))
-    logger.info("found these: ")
-    print(script_list)
+    logger.info("found these: in {}", script_dir)
+    logger.info(script_list)
     return script_list
 
 #strips out the path and extension to get the scripts name
