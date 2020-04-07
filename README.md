@@ -59,7 +59,7 @@ jobs:
 ```  
 
 ## Example usage with 2 instances
-# you would probably have 2 sets of secrets, with url and credentials for each instance. You also will probably need 2 files. One for pushes, commits or PR's to the master branch. And another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
+you would probably have 2 sets of secrets, with url and credentials for each instance. You also will probably need 2 files. One for pushes, commits or PR's to the master branch. And another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
 
 ```yaml
 on:
