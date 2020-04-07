@@ -10,7 +10,7 @@ import sys
 from loguru import logger
 
 logger.remove()
-logger.add(sys.stderr, colorize=True, level="ERROR", format="<orange>{time}</blue> {function}: <lvl>{message}</lvl>")
+logger.add(sys.stderr, colorize=True, level="ERROR", format="<red>{time}</red> {function}: <lvl>{message}</lvl>")
 logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time}</blue>: <lvl>{message}</lvl>")
 
 
