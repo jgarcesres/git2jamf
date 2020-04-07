@@ -169,9 +169,6 @@ if __name__ == "__main__":
     logger.info('branch is: ' + prefix)
     logger.info('scripts_extensions are: {}'.format(script_extensions))
 
-    #grab the token from jamf
-    logger.info('grabing the token from jamf')
-    token = get_jamf_token(url, username, password)
     logger.info('checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
     #I need to simplify this array down to the just the name of the script and compare to avoid dupes
@@ -179,17 +176,21 @@ if __name__ == "__main__":
     for script in local_scripts:
         simple_name_local_scripts.append(get_script_name(script).lower())
     
-    logger.info('Doublechecking for duplicate names')
+    logger.info('doublechecking for duplicate names')
     for script in simple_name_local_scripts:
         if simple_name_local_scripts.count(script) >= 2:
             logger.error("Script_name: {} conflicts with another in your repository, please resolve it.", script)
             raise("Found scripts with duplicates name in the repository, please resolve")
-    
     logger.success("found no duplicate script names, we can continue")
+
+    #grab the token from jamf
+    logger.info('grabing the token from jamf')
+    token = get_jamf_token(url, username, password)
     logger.info('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
-    logger.info("setting all script names to lower case to avoid false positives in our search. \n Worry not, this won't affect the actual naming :)")
-    
+    logger.info("setting all script names to lower case to avoid false positives in our search.")
+    logger.info("worry not, this won't affect the actual naming :)")
+    #save the scripts name all in lower_case
     for script in jamf_scripts:
         script['lower_case_name'] = script['name'].lower() 
     
@@ -199,15 +200,15 @@ if __name__ == "__main__":
         logger.info("script {} of {} ".format(count+1, len(local_scripts)))
         script_name = get_script_name(script)
         if enable_prefix == False:
-            logger.info("Prefix disabled")
+            logger.info("prefix disabled")
             logger.info("script name is: {}".format(script_name))
         else:
-            logger.info("Prefix enabled")
+            logger.info("prefix enabled")
             prefix = prefix.split('/')[-1]
             script_name = "{}_{}".format(prefix,script_name)
-            logger.info("New script name: {}".format(script_name))
+            logger.info("new script name: {}".format(script_name))
         #check to see if the script name exists in jamf
-        logger.info("Now let's see if {} exists in jamf already", script_name)
+        logger.info("now let's see if {} exists in jamf already", script_name)
         script_search = jmespath.search("[?lower_case_name == '{}']".format(script_name.lower()), jamf_scripts)
         if len(script_search) == 0:
             logger.info("doesn't exist, lets create it")
