@@ -10,10 +10,6 @@ import sys
 from loguru import logger
 
 
-logger.add(sys.stdout, colorize=True, format="<green>{time}</green> {message}")
-logger.add(sys.stderr, colorize=True, format="<red>{time}</red> {message}")
-#logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO")
-
 #function to get the token given the url, usrername and password
 def get_jamf_token(url, username, password):
     token_request = requests.post(url='{}/uapi/auth/tokens'.format(url), auth = (username, password))
