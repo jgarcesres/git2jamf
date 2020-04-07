@@ -10,8 +10,8 @@ import sys
 from loguru import logger
 
 logger.remove()
-logger.add(sys.stderr, colorize=True, level="ERROR", format="<red>{time}</red> {function}: <lvl>{message}</lvl>")
-logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time}</blue>: <lvl>{message}</lvl>")
+logger.add(sys.stderr, colorize=True, level="ERROR", format="<red>{time:HH:mm:ss!UTC}</red> {function}: <lvl>{message}</lvl>")
+logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss!UTC}</blue>: <lvl>{message}</lvl>")
 
 
 #function to get the token given the url, usrername and password
