@@ -16,47 +16,51 @@ logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time}</blue> 
 
 
 #function to get the token given the url, usrername and password
+@logger.catch
 def get_jamf_token(url, username, password):
     token_request = requests.post(url='{}/uapi/auth/tokens'.format(url), auth = (username, password))
     if token_request.status_code in range(200, 203):
-        logger.info("got the token! it expires in: {}".format(token_request.json()['expires']))
+        logger.success("got the token! it expires in: {}".format(token_request.json()['expires']))
         return token_request.json()['token']
     elif token_request.status_code == 404:
-        logger.warning('failed to retrieve a valid token, please check the url')   
+        logger.critical('failed to retrieve a valid token, please check the url')   
     elif token_request.status_code == 401:
-        logger.warning('failed to retrieve a valid token, please check the credentials')      
+        logger.critical('failed to retrieve a valid token, please check the credentials')      
     else:
-        logger.warning('failed to retrieve a valid token')
+        logger.critical('failed to retrieve a valid token')
         logger.warning(token_request.text)
 
 #function to invalidate a token so it can't be use after we're done
+@logger.catch
 def invalidate_jamf_token():
     header = { "Authorization": "Bearer {}".format(token) }
     token_request = requests.post(url='{}/uapi/auth/invalidateToken'.format(url), headers=header)
     if token_request.status_code in range(200, 300):
-        logger.info("token invalidated succesfully")
+        logger.success("token invalidated succesfully")
         return True
     else:
         logger.warning("failed to invalidate the token, maybe it's already expired?")
         logger.warning(token_request.text)
 
 #function to update an already existing script
+@logger.catch
 def update_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
     if script_request.status_code in range(200, 300):
-        logger.info("script was updated succesfully")
+        logger.success("script was updated succesfully")
         return True
     else:
         logger.warning("failed to update the script")
         logger.warning(script_request.text)
 
 #function to create a new script
+@logger.catch
 def create_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.post(url='{}/uapi/v1/scripts'.format(url), headers=header, json=payload)
     if script_request.status_code in range(200, 300):
-        logger.info("script created")
+        logger.success("script created")
         return True
     else:
         logger.warning("failed to create the sript")
@@ -64,6 +68,7 @@ def create_jamf_script(payload):
 
 
 #retrieves all scripts in a json
+@logger.catch
 def get_jamf_scripts(scripts = [], page = 0):
     header = { "Authorization": "Bearer {}".format(token) }
     page_size=50
@@ -80,16 +85,17 @@ def get_jamf_scripts(scripts = [], page = 0):
         else:
             logger.info("reached the end of our search")
             scripts.extend(script_list['results'])
-            logger.info("retrieved {} total scripts".format(len(scripts)))
+            logger.success("retrieved {} total scripts".format(len(scripts)))
             return scripts
     else:
-        logger.warning("status code: {}".format(script_list.status_code))
-        logger.warning("error retrevieving script list")
-        logger.warning(script_list.text)
+        logger.critical("status code: {}".format(script_list.status_code))
+        logger.critical("error retrevieving script list")
+        logger.critical(script_list.text)
         exit(1)
 
 
 #search for the script name and return the json that represents it
+@logger.catch
 def find_jamf_script(script_name, page = 0):
     header = { "Authorization": "Bearer {}".format(token) }
     page_size=50
@@ -109,12 +115,13 @@ def find_jamf_script(script_name, page = 0):
             logger.info("did not find any script named {}".format(script_name))
             return "n/a"
     else:
-        logger.warning("status code: {}".format(script_list.status_code))
-        logger.warning("error retrevieving script list")
-        logger.warning(script_list.text)
+        logger.critical("status code: {}".format(script_list.status_code))
+        logger.critical("error retrevieving script list")
+        logger.critical(script_list.text)
         exit(1)
 
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
+@logger.catch
 def compare_scripts(new, old):
     md5_new = hashlib.md5(new.encode()) 
     md5_old = hashlib.md5(old.encode())
@@ -126,6 +133,7 @@ def compare_scripts(new, old):
         return False
 
 #retrieves list of files given a folder path and the list of valid file extensions to look for
+@logger.catch
 def find_local_scripts(script_dir, script_extensions):
     script_list = []
     logger.info('searching for files ending in {} in {}'.format(script_extensions, script_dir))
@@ -136,6 +144,7 @@ def find_local_scripts(script_dir, script_extensions):
     return script_list
 
 #strips out the path and extension to get the scripts name
+@logger.catch
 def get_script_name(script_path):
     return script_path.split('/')[-1].split('.')[0]
 
@@ -229,5 +238,5 @@ if __name__ == "__main__":
     
     logger.info("expiring the token so it can't be used further")
     invalidate_jamf_token()
-    logger.info("finished!")
+    logger.success("finished!")
 
