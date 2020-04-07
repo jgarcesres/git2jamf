@@ -160,7 +160,8 @@ if __name__ == "__main__":
     workspace_dir = os.environ['GITHUB_WORKSPACE']
     if script_dir != workspace_dir:
         script_dir = '{}/{}'.format(workspace_dir,script_dir)
-    prefix = os.environ['INPUT_BRANCH_NAME']
+    prefix = os.environ['INPUT_PREFIX_NAME']
+    enable_prefix = os.environ['INPUT_ENABLE_PREFIX']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
     logger.info('url is: ' + url)
@@ -182,8 +183,8 @@ if __name__ == "__main__":
     for script in simple_name_local_scripts:
         search = jmespath.search("[?name == '{}']".format(script), simple_name_local_scripts)
         if len(search) >= 2:
-            logger.warning("found a conflicting script name, please resolve it.")
-            logger.warning(search)
+            logger.error("found a conflicting script name, please resolve it.")
+            logger.error(search)
             raise("Found scripts with duplicates name in the repository, please resolve")
     logger.info('now checking against jamf for the list of scripts')
     jamf_scripts = get_jamf_scripts()
@@ -195,13 +196,11 @@ if __name__ == "__main__":
         logger.info("----------------------")
         logger.info("script {} of {} ".format(count+1, len(local_scripts)))
         script_name = get_script_name(script)
-        if 'master' in prefix:
-            logger.info(" we're in the master branch, we won't use the prefix")
-            #if this is the master branch we'll go with the vanilla name
+        if enable_prefix == False:
+            logger.info("Prefix disabled")
             logger.info("script name is: {}".format(script_name))
         else:
-            logger.info("not the master branch, using the branch name as a prefix")
-            #if it's not the master branch then we will use the branch name as a prefix_
+            logger.info("Prefix enabled")
             prefix = prefix.split('/')[-1]
             script_name = "{}_{}".format(prefix,script_name)
             logger.info("new scripts name: {}".format(script_name))
