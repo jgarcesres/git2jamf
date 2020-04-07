@@ -125,9 +125,9 @@ def find_jamf_script(script_name, page = 0):
 @logger.catch
 def compare_scripts(new, old):
     md5_new = hashlib.md5(new.encode())
-    logger.info("hash of the of local file: {}", md5_new) 
+    logger.info("hash of the of local file: {}", md5_new.hexdigest) 
     md5_old = hashlib.md5(old.encode())
-    logger.info("hash of the of local file: {}", md5_old) 
+    logger.info("hash of the of local file: {}", md5_old.hexdigest) 
     if md5_new.hexdigest() == md5_old.hexdigest():
         logger.info("scripts are the same")
         return True
