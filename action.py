@@ -22,12 +22,15 @@ def get_jamf_token(url, username, password):
         logger.success("got the token! it expires in: {}".format(token_request.json()['expires']))
         return token_request.json()['token']
     elif token_request.status_code == 404:
-        logger.critical('failed to retrieve a valid token, please check the url')   
+        logger.error('failed to retrieve a valid token, please check the url')
+        raise Exception("failed to retrieve a valid token, please check the credentials")   
     elif token_request.status_code == 401:
-        logger.critical('failed to retrieve a valid token, please check the credentials')      
+        logger.error('failed to retrieve a valid token, please check the credentials')
+        raise Exception("failed to retrieve a valid token, please check the credentials")      
     else:
-        logger.critical('failed to retrieve a valid token')
-        logger.warning(token_request.text)
+        logger.error('failed to retrieve a valid token')
+        logger.error(token_request.text)
+        raise Exception("failed to retrieve a valid token, please check the credentials")
 
 #function to invalidate a token so it can't be use after we're done
 @logger.catch
@@ -60,11 +63,11 @@ def create_jamf_script(payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.post(url='{}/uapi/v1/scripts'.format(url), headers=header, json=payload)
     if script_request.status_code == 201:
-        logger.info("status code for put: {}", script_request.status_code)
         logger.success("script created")
         return True
     else:
         logger.warning("failed to create the sript")
+        logger.debug("status code for put: {}", script_request.status_code)
         logger.warning(script_request.text)
 
 
@@ -89,10 +92,10 @@ def get_jamf_scripts(scripts = [], page = 0):
             logger.success("retrieved {} total scripts".format(len(scripts)))
             return scripts
     else:
-        logger.critical("status code: {}".format(script_list.status_code))
-        logger.critical("error retrevieving script list")
-        logger.critical(script_list.text)
-        exit(1)
+        logger.error("status code: {}".format(script_list.status_code))
+        logger.error("error retrevieving script list")
+        logger.error(script_list.text)
+        raise Exception("error retrevieving script list")
 
 
 #search for the script name and return the json that represents it
@@ -116,10 +119,10 @@ def find_jamf_script(script_name, page = 0):
             logger.info("did not find any script named {}".format(script_name))
             return "n/a"
     else:
-        logger.critical("status code: {}".format(script_list.status_code))
-        logger.critical("error retrevieving script list")
-        logger.critical(script_list.text)
-        exit(1)
+        logger.error("status code: {}".format(script_list.status_code))
+        logger.error("error retrevieving script list")
+        logger.error(script_list.text)
+        raise Exception("failed to find the script, please investigate!")
 
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
 @logger.catch
@@ -142,7 +145,7 @@ def find_local_scripts(script_dir, script_extensions):
     logger.info('searching for files ending in {} in {}'.format(script_extensions, script_dir))
     for file_type in script_extensions:
         script_list.extend(glob.glob('{}/**/*.{}'.format(script_dir, file_type), recursive = True))
-    logger.info("found these: in {}", script_dir)
+    logger.info("found these: ", script_dir)
     logger.info(script_list)
     return script_list
 
@@ -151,11 +154,9 @@ def find_local_scripts(script_dir, script_extensions):
 def get_script_name(script_path):
     return script_path.split('/')[-1].split('.')[0]
 
-
-
+#run this thing
 if __name__ == "__main__":
     logger.info('reading environment variables')
-    #jamf_args = read_args(sys.argv[1:])
     url = os.environ['INPUT_JAMF_URL']
     username = os.environ['INPUT_JAMF_USERNAME']
     password = os.environ['INPUT_JAMF_PASSWORD']
@@ -187,8 +188,10 @@ if __name__ == "__main__":
     logger.info('doublechecking for duplicate names')
     for script in simple_name_local_scripts:
         if simple_name_local_scripts.count(script) >= 2:
-            logger.error("Script_name: {} conflicts with another in your repository, please resolve it.", script)
-            raise("Found scripts with duplicates name in the repository, please resolve")
+            logger.error("Script_name: {}",script)
+            logger.error("conflicts with another in your repository, please resolve it.")
+            raise Exception("Found scripts with duplicates name in the repository, please resolve")
+    #continue if no dupes are found
     logger.success("found no duplicate script names, we can continue")
 
     #grab the token from jamf
@@ -206,6 +209,7 @@ if __name__ == "__main__":
     for count, script in enumerate(local_scripts):
         logger.info("----------------------")
         logger.info("script {} of {} ".format(count+1, len(local_scripts)))
+        logger.info("path of the script: {}".format(script))
         script_name = get_script_name(script)
         if enable_prefix == False:
             #don't use the prefix
