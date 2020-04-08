@@ -35,7 +35,7 @@ This action grabs the github work directory (or any of your choice) scans it for
 
 what scripts were updated
 
-## Example usage 
+## Example usage with one instance
 
 ```yaml
 on:
@@ -56,7 +56,29 @@ jobs:
           jamf_username: ${{ secrets.jamf_username }}
           jamf_password: ${{ secrets.jamf_password }}
           script_dir: scripts
+          enable_prefix: true
 ```  
+```yaml
+on:
+  pull_request:
+    branches: 
+      - master
+jobs:
+  jamf_scripts:
+    runs-on: ubuntu-latest
+    name: A job to push script changes to production in jamf
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: jamf_scripts 
+        uses: jgarcesres/git2jamf@v.1
+        with: 
+          jamf_url: ${{ secrets.jamf_url }}
+          jamf_username: ${{ secrets.jamf_username }}
+          jamf_password: ${{ secrets.jamf_password }}
+          script_dir: '**/scripts'
+          enable_prefix: false
+```
 
 ## Example usage with 2 instances
 you would probably have 2 sets of secrets, with url and credentials for each instance. You also will probably need 2 files. One for pushes, commits or PR's to the master branch. And another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
