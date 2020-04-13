@@ -2,7 +2,7 @@
 This action grabs the github work directory (or any of your choice) scans it for scripts and compares them against a pull of all scripts on jamf:
 * If it doesn't exist, it will create it
 * if it exists, it will compare the two and update it in jamf if they differ. Github is always treated as the source.
-* It will add a suffix with the `branch name_`  to any script that's not part of the master branch
+* It will add a suffix with the `branch name_`  to a script. This can be disabled and probably should for master -> to production instances.
 ## Inputs
 
 ### `jamf_url`
@@ -50,7 +50,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: jamf_scripts 
-        uses: jgarcesres/git2jamf@v.1
+        uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_url }}
           jamf_username: ${{ secrets.jamf_username }}
@@ -71,7 +71,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: jamf_scripts 
-        uses: jgarcesres/git2jamf@v.1
+        uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_url }}
           jamf_username: ${{ secrets.jamf_username }}
@@ -97,7 +97,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: jamf_scripts 
-        uses: jgarcesres/git2jamf@v.1
+        uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_test_url }}
           jamf_username: ${{ secrets.jamf_test_username }}
@@ -119,7 +119,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: jamf_scripts 
-        uses: jgarcesres/git2jamf@v.1
+        uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_prod_url }}
           jamf_username: ${{ secrets.jamf_prod_username }}
