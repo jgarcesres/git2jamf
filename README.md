@@ -1,4 +1,4 @@
-# git2jamf
+# git2jamf [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 This action grabs the github work directory (or any of your choice) scans it for scripts and compares them against a pull of all scripts on jamf:
 * If it doesn't exist, it will create it
 * if it exists, it will compare the two and update it in jamf if they differ. Github is always treated as the source.
