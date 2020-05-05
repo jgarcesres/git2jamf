@@ -66,7 +66,7 @@ jobs:
 
 ```yaml
 on:
-  pull_request:
+  push:
     branches: 
       - master
 jobs:
