@@ -36,7 +36,7 @@ This action grabs the github work directory (or any of your choice) scans it for
 what scripts were updated
 
 ## Example usage with 2 instances
-you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers, up to you). You also will need 2 workflow files. One for pushes or PR's to the master branch. And another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
+you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers, up to you). You also will need 2 workflow files: one for pushes to the master branch and another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
 
 ```yaml
 on:
