@@ -16,7 +16,7 @@ logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss
 #function to get the token given the url, usrername and password
 @logger.catch
 def get_jamf_token(url, username, password):
-    token_request = requests.post(url='{}/uapi/auth/tokens'.format(url), auth = (username, password))
+    token_request = requests.post(url=f'{url}/uapi/auth/tokens', auth = (username, password))
     if token_request.status_code == 200:
         logger.success("got the token! it expires in: {}".format(token_request.json()['expires']))
         return token_request.json()['token']
