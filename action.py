@@ -17,7 +17,7 @@ logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss
 @logger.catch
 def get_jamf_token(url, username, password):
     token_request = requests.post(url=f'{url}/uapi/auth/tokens', auth = (username, password))
-    if token_request.status_code == 200:
+    if token_request.status_code == requests.codes.ok:
         logger.success("got the token! it expires in: {}".format(token_request.json()['expires']))
         return token_request.json()['token']
     elif token_request.status_code == 404:
@@ -204,10 +204,10 @@ def push_scripts():
     for script in simple_name_local_scripts:
         if simple_name_local_scripts.count(script) >= 2:
             logger.error("conflicts with another in your repository, please resolve it.")
-            while simple_name_local_scripts.count(script) > 1:
+            while simple_name_local_scripts.count(script) > 0:
                 logger.error(local_scripts[simple_name_local_scripts.index(script)])
                 simple_name_local_scripts.remove(script)	            
-            raise Exception("Found scripts with duplicates name in the repository, please resolve")
+            sys.exit(1)
     #continue if no dupes are found
     logger.success("found no duplicate script names, we can continue")
 
