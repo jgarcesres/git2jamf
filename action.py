@@ -10,7 +10,6 @@ import sys
 from loguru import logger
 
 logger.remove()
-#logger.add(sys.stderr, colorize=True, level="ERROR", format="<red>{time:HH:mm:ss!UTC}</red> {function}: <lvl>{message}</lvl>")
 logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss!UTC}</blue>: <lvl>{message}</lvl>")
 
 
@@ -44,19 +43,6 @@ def invalidate_jamf_token():
         logger.warning("failed to invalidate the token, maybe it's already expired?")
         logger.warning(token_request.text)
 
-#function to update an already existing script
-@logger.catch
-def update_jamf_script(payload):
-    header = { "Authorization": "Bearer {}".format(token) }
-    script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
-    if script_request.status_code in range (200, 202):
-        logger.success("script was updated succesfully")
-        return True
-    else:
-        logger.warning("failed to update the script")
-        logger.debug("status code for put: {}", script_request.status_code)
-        logger.warning(script_request.text)
-
 #function to create a new script
 @logger.catch
 def create_jamf_script(payload):
@@ -71,9 +57,23 @@ def create_jamf_script(payload):
         logger.warning(script_request.text)
 
 
+#function to update an already existing script
+@logger.catch
+def update_jamf_script(payload):
+    header = { "Authorization": "Bearer {}".format(token) }
+    script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
+    if script_request.status_code in range (200, 202):
+        logger.success("script was updated succesfully")
+        return True
+    else:
+        logger.warning("failed to update the script")
+        logger.debug("status code for put: {}", script_request.status_code)
+        logger.warning(script_request.text)
+
+
 #retrieves all scripts in a json
 @logger.catch
-def get_jamf_scripts(scripts = [], page = 0):
+def get_all_jamf_scripts(scripts = [], page = 0):
     header = { "Authorization": "Bearer {}".format(token) }
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
@@ -85,7 +85,7 @@ def get_jamf_scripts(scripts = [], page = 0):
         if (page*page_size) < script_list['totalCount']:
             logger.info("seems there's more to grab")
             scripts.extend(script_list['results'])
-            return get_jamf_scripts(scripts, page)
+            return get_all_jamf_scripts(scripts, page)
         else:
             logger.info("reached the end of our search")
             scripts.extend(script_list['results'])
@@ -98,7 +98,7 @@ def get_jamf_scripts(scripts = [], page = 0):
         raise Exception("error retrevieving script list")
 
 
-#search for the script name and return the json that represents it
+#search for the script name and return the json that for it
 @logger.catch
 def find_jamf_script(script_name, page = 0):
     header = { "Authorization": "Bearer {}".format(token) }
@@ -123,6 +123,41 @@ def find_jamf_script(script_name, page = 0):
         logger.error("error retrevieving script list")
         logger.error(script_list.text)
         raise Exception("failed to find the script, please investigate!")
+
+#function to find a EA script using the filename as the script name
+@logger.catch
+def find_ea_script(ea_name):
+    ea_script = requests.get(url="{}/JSSResource/computerextensionattributes/name/{}".format(url, ea_name), auth=(username,password))
+    if ea_script.status_code == 200:
+        return ea_script.json()['computer_extension_attribute']
+    elif ea_script.status_code == 404:
+        logger.warning("Found no script with name: {}".format(ea_name))
+        return None
+    else:
+        logger.error("encountered an error retriving the extension attribute, stopping")
+        logger.error(ea_script.text)
+        raise Exception("encountered an error retriving the extension attribute, stopping")
+@logger.catch
+def create_ea_script(payload, id):
+    headers = {"Accept": "text/xml", "Content-Type": "text/xml"}
+    ea_script = requests.post(url="{}/JSSResource/computerextensionattributes/id/{}".format(url, id), json=payload, auth=(username,password))
+    if ea_script.status_code == 200:
+        return "success"
+    else:
+        logger.error("encountered an error creating the extension attribute, stopping")
+        logger.error(ea_script.text)
+        raise Exception("encountered an error creating the extension attribute, stopping")
+
+@logger.catch
+def update_ea_script(payload, id):
+    headers = {"Accept": "text/xml", "Content-Type": "text/xml"}
+    ea_script = requests.put(url="{}/JSSResource/computerextensionattributes/id/{}".format(url, id), json=payload, auth=(username,password))
+    if ea_script.status_code == 200:
+        return "success"
+    else:
+        logger.error("encountered an error creating the extension attribute, stopping")
+        logger.error(ea_script.text)
+        raise Exception("encountered an error creating the extension attribute, stopping")
 
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
 @logger.catch
@@ -154,51 +189,28 @@ def find_local_scripts(script_dir, script_extensions):
 def get_script_name(script_path):
     return script_path.split('/')[-1].split('.')[0]
 
-#run this thing
-if __name__ == "__main__":
-    logger.info('reading environment variables')
-    url = os.environ['INPUT_JAMF_URL']
-    username = os.environ['INPUT_JAMF_USERNAME']
-    password = os.environ['INPUT_JAMF_PASSWORD']
-    script_dir = os.environ['INPUT_SCRIPT_DIR']
-    workspace_dir = os.environ['GITHUB_WORKSPACE']
-    if script_dir != workspace_dir:
-        script_dir = '{}/{}'.format(workspace_dir,script_dir)
-    prefix = os.environ['INPUT_PREFIX_NAME']
-    enable_prefix = os.environ['INPUT_ENABLE_PREFIX']
-    script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
-    script_extensions = script_extensions.split()
-    logger.info('url is: ' + url)
-    logger.info('workspace dir is: ' + workspace_dir)
-    logger.info('script_dir is: ' + script_dir)
-    logger.info('branch is: ' + prefix)
-    logger.info('scripts_extensions are: {}'.format(script_extensions))
-    if enable_prefix == False:
-        logger.warning("prefix is disabled")
-    else:
-        logger.warning("prefix is enabled")
-
+@logger.catch
+def push_scripts():
     logger.info('checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
     #I need to simplify this array down to the just the name of the script and compare to avoid dupes
     simple_name_local_scripts = []
     for script in local_scripts:
         simple_name_local_scripts.append(get_script_name(script).lower())
-    
+
     logger.info('doublechecking for duplicate names')
     for script in simple_name_local_scripts:
         if simple_name_local_scripts.count(script) >= 2:
-            logger.error("Script_name: {}",script)
-            logger.error("conflicts with another in your repository, please resolve it.")
-            raise Exception("Found scripts with duplicates name in the repository, please resolve")
+        	logger.error("conflicts with another in your repository, please resolve it.")
+        	while simple_name_local_scripts.count(script) > 1:
+        		logger.error(local_scripts[simple_name_local_scripts.index(script)])
+        		simple_name_local_scripts.remove(script)	            
+					raise Exception("Found scripts with duplicates name in the repository, please resolve")
     #continue if no dupes are found
     logger.success("found no duplicate script names, we can continue")
 
-    #grab the token from jamf
-    logger.info('grabing the token from jamf')
-    token = get_jamf_token(url, username, password)
     logger.info('now checking against jamf for the list of scripts')
-    jamf_scripts = get_jamf_scripts()
+    jamf_scripts = get_all_jamf_scripts()
     logger.info("setting all script names to lower case to avoid false positives in our search.")
     logger.info("worry not, this won't affect the actual naming :)")
     #save the scripts name all in lower_case
@@ -245,5 +257,47 @@ if __name__ == "__main__":
     
     logger.info("expiring the token so it can't be used further")
     invalidate_jamf_token()
-    logger.success("finished!")
+    logger.success("finished with the scripts, are there any EA scripts?!")   
+
+def push_ea_scripts():
+    return ""
+
+#run this thing
+if __name__ == "__main__":
+    logger.info('reading environment variables')
+    url = os.environ['INPUT_JAMF_URL']
+    username = os.environ['INPUT_JAMF_USERNAME']
+    password = os.environ['INPUT_JAMF_PASSWORD']
+    script_dir = os.environ['INPUT_SCRIPT_DIR']
+    ea_script_dir = os.environ['INPUT_EA_SCRIPT_DIR']
+    workspace_dir = os.environ['GITHUB_WORKSPACE']
+    if script_dir != workspace_dir:
+        script_dir = '{}/{}'.format(workspace_dir,script_dir)
+    prefix = os.environ['INPUT_PREFIX_NAME']
+    enable_prefix = os.environ['INPUT_ENABLE_PREFIX']
+    script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
+    script_extensions = script_extensions.split()
+    logger.info('url is: ' + url)
+    logger.info('workspace dir is: ' + workspace_dir)
+    logger.info('script_dir is: ' + script_dir)
+    logger.info('branch is: ' + prefix)
+    logger.info('scripts_extensions are: {}'.format(script_extensions))
+    if enable_prefix == False:
+        logger.warning("prefix is disabled")
+    else:
+        logger.warning("prefix is enabled")
+
+    #grab the token from jamf
+    logger.info('grabing the token from jamf')
+    token = get_jamf_token(url, username, password)
+    #run the block to push the "normal" scripts to jamf
+    push_scripts()
+    #check to see if we have an EA scripts to push over
+    if ea_script_dir != False:
+        logger.info("we have some EA scripts to process")
+        push_ea_scripts()
+    else:
+        logger.warning("no EA script folder set, skipping")
+
+    logger.success("we're done!")
 

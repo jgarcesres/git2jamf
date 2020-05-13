@@ -16,6 +16,10 @@ inputs:
         description: >
             the directory where the scripts to process are defaults to the github.workspace environment variable
         default: ${{ github.workspace }}
+    ea_script_dir:
+        description: >
+            the directory where the extion attribute scripts to process are defaults to the github.workspace environment variable
+        default: false
     script_extensions:
         description: >
             extension for the types of scripts we'll be looking to upload defaults to .sh and .py files
