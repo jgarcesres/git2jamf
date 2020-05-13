@@ -201,13 +201,16 @@ def push_scripts():
         simple_name_local_scripts.append(get_script_name(script).lower())
 
     logger.info('doublechecking for duplicate names')
+    dupes = False
     for script in simple_name_local_scripts:
         if simple_name_local_scripts.count(script) >= 2:
-            logger.error("conflicts with another in your repository, please resolve it.")
+            dupes = True
+            logger.error("Found conflicting script names please resolve them.")
             while simple_name_local_scripts.count(script) > 0:
                 logger.error(local_scripts[simple_name_local_scripts.index(script)])
                 simple_name_local_scripts.remove(script)	            
-            sys.exit(1)
+    if dupes == True:
+        sys.exit(1)
     #continue if no dupes are found
     logger.success("found no duplicate script names, we can continue")
 
