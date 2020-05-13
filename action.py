@@ -52,9 +52,10 @@ def create_jamf_script(payload):
         logger.success("script created")
         return True
     else:
-        logger.warning("failed to create the sript")
+        logger.warning("failed to create the script")
         logger.debug("status code for put: {}", script_request.status_code)
         logger.warning(script_request.text)
+        sys.exit(1)
 
 
 #function to update an already existing script
@@ -69,6 +70,7 @@ def update_jamf_script(payload):
         logger.warning("failed to update the script")
         logger.debug("status code for put: {}", script_request.status_code)
         logger.warning(script_request.text)
+        sys.exit(1)
 
 
 #retrieves all scripts in a json
