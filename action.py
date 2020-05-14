@@ -189,7 +189,7 @@ def find_local_scripts(script_dir, script_extensions):
 #strips out the path and extension to get the scripts name
 @logger.catch
 def get_script_name(script_path):
-    return script_path.split('/')[-1].split('.')[0]
+    return script_path.split('/')[-1].rsplit('.', 1)[0]
 
 @logger.catch
 def push_scripts():
