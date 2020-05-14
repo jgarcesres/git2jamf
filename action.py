@@ -285,7 +285,7 @@ if __name__ == "__main__":
     logger.info('script_dir is: ' + script_dir)
     logger.info('branch is: ' + prefix)
     logger.info('scripts_extensions are: {}'.format(script_extensions))
-    if enable_prefix == False:
+    if enable_prefix == 'false':
         logger.warning("prefix is disabled")
     else:
         logger.warning("prefix is enabled")
