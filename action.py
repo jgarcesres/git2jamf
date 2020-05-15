@@ -226,7 +226,7 @@ def push_scripts(prefix):
         logger.info("script {} of {} ".format(count+1, len(local_scripts)))
         logger.info("path of the script: {}".format(script))
         script_name = get_script_name(script)
-        if enable_prefix == False:
+        if enable_prefix == 'false':
             #don't use the prefix
             logger.info("script name is: {}".format(script_name))
         else:
