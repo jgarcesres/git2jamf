@@ -192,7 +192,7 @@ def get_script_name(script_path):
     return script_path.split('/')[-1].rsplit('.', 1)[0]
 
 @logger.catch
-def push_scripts():
+def push_scripts(prefix):
     logger.info('checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
     #I need to simplify this array down to the just the name of the script and compare to avoid dupes
@@ -294,7 +294,7 @@ if __name__ == "__main__":
     logger.info('grabing the token from jamf')
     token = get_jamf_token(url, username, password)
     #run the block to push the "normal" scripts to jamf
-    push_scripts()
+    push_scripts(prefix)
     #check to see if we have an EA scripts to push over
     if ea_script_dir != False:
         logger.info("we have some EA scripts to process")
