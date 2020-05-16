@@ -284,7 +284,7 @@ if __name__ == "__main__":
     logger.info(f"url is: {url}")
     logger.info(f"workspace dir is: {workspace_dir}")
     logger.info(f"script_dir is:  {script_dir}")
-    logger.info(f"branch is: {prefix}")
+    logger.info(f"branch is: {branch}")
     logger.info(f"scripts_extensions are: {script_extensions}")
     if enable_prefix == 'false':
         logger.warning("prefix is disabled")
