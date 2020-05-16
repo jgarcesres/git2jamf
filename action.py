@@ -223,20 +223,20 @@ def push_scripts(prefix):
     logger.info("processing each script now")
     for count, script in enumerate(local_scripts):
         logger.info("----------------------")
-        logger.info("script {} of {} ".format(count+1, len(local_scripts)))
-        logger.info("path of the script: {}".format(script))
+        logger.info(f"script {count+1} of {len(local_scripts)}")
+        logger.info(f"path of the script: {script}")
         script_name = get_script_name(script)
-        if enable_prefix == 'false':
+        if enable_prefix == "false":
             #don't use the prefix
-            logger.info("script name is: {}".format(script_name))
+            logger.info(f"script name is: {script_name}")
         else:
             #use the prefix
             prefix = prefix.split('/')[-1]
-            script_name = "{}_{}".format(prefix,script_name)
-            logger.info("the new script name: {}".format(script_name))
+            script_name = f"{prefix}_{script_name}"
+            logger.info(f"the new script name: {script_name}")
         #check to see if the script name exists in jamf
-        logger.info("now let's see if {} exists in jamf already", script_name)
-        script_search = jmespath.search("[?lower_case_name == '{}']".format(script_name.lower()), jamf_scripts)
+        logger.info(f"now let's see if {script_name} exists in jamf already")
+        script_search = jmespath.search(f"[?lower_case_name == '{script_name.lower()}']", jamf_scripts)
         if len(script_search) == 0:
             logger.info("it doesn't exist, lets create it")
             #it doesn't exist, we can create it
@@ -262,6 +262,7 @@ def push_scripts(prefix):
     invalidate_jamf_token()
     logger.success("finished with the scripts, are there any EA scripts?!")   
 
+
 def push_ea_scripts():
     return ""
 
@@ -275,16 +276,16 @@ if __name__ == "__main__":
     ea_script_dir = os.environ['INPUT_EA_SCRIPT_DIR']
     workspace_dir = os.environ['GITHUB_WORKSPACE']
     if script_dir != workspace_dir:
-        script_dir = '{}/{}'.format(workspace_dir,script_dir)
+        script_dir = f"{workspace_dir}/{script_dir}"
     prefix = os.environ['INPUT_PREFIX_NAME']
     enable_prefix = os.environ['INPUT_ENABLE_PREFIX']
     script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
     script_extensions = script_extensions.split()
-    logger.info('url is: ' + url)
-    logger.info('workspace dir is: ' + workspace_dir)
-    logger.info('script_dir is: ' + script_dir)
-    logger.info('branch is: ' + prefix)
-    logger.info('scripts_extensions are: {}'.format(script_extensions))
+    logger.info(f"url is: {url}")
+    logger.info(f"workspace dir is: {workspace_dir}")
+    logger.info(f"script_dir is:  {script_dir}")
+    logger.info(f"branch is: {prefix}")
+    logger.info(f"scripts_extensions are: {script_extensions}")
     if enable_prefix == 'false':
         logger.warning("prefix is disabled")
     else:
@@ -296,6 +297,7 @@ if __name__ == "__main__":
     #run the block to push the "normal" scripts to jamf
     push_scripts(prefix)
     #check to see if we have an EA scripts to push over
+    logger.info(f"the default input type is {type(ea_script_dir)}")
     if ea_script_dir != False:
         logger.info("we have some EA scripts to process")
         push_ea_scripts()
