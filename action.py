@@ -277,7 +277,7 @@ if __name__ == "__main__":
     workspace_dir = os.getenv('GITHUB_WORKSPACE')
     if script_dir != workspace_dir:
         script_dir = f"{workspace_dir}/{script_dir}"
-    prefix = os.getenv['INPUT_PREFIX']
+    prefix = os.getenv('INPUT_PREFIX')
     branch = os.getenv('GITHUB_REF')
     script_extensions = os.getenv('INPUT_SCRIPT_EXTENSIONS')
     script_extensions = script_extensions.split()
