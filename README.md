@@ -25,9 +25,9 @@ This action grabs the github work directory (or any of your choice) scans it for
 
 **optional** the extensions for the types of files we'll be searching for. By default it tries to look for *.sh* and *.py* files. To change the behavior, separate each input with spaces and no periods. ie `sh py ps1`
 
-### `enable_prefix`
+### `prefix`
 
-**optional** by default this will be `true`, it will add the branch name as a prefix to the script before uploading it. You probably want to disable this for pushes to your `master` so it can send a clean file name to your production instance.
+**optional** by default this will be `false`, it will add the branch name as a prefix to the script before uploading it. 
 
 ## Outputs
 

@@ -192,7 +192,7 @@ def get_script_name(script_path):
     return script_path.split('/')[-1].rsplit('.', 1)[0]
 
 @logger.catch
-def push_scripts(prefix):
+def push_scripts():
     logger.info('checking the list of local scripts to upload or create')
     local_scripts = find_local_scripts(script_dir, script_extensions)
     #I need to simplify this array down to the just the name of the script and compare to avoid dupes
@@ -226,12 +226,12 @@ def push_scripts(prefix):
         logger.info(f"script {count+1} of {len(local_scripts)}")
         logger.info(f"path of the script: {script}")
         script_name = get_script_name(script)
-        if enable_prefix == "false":
+        if prefix == "false":
             #don't use the prefix
             logger.info(f"script name is: {script_name}")
         else:
-            #use the prefix
-            prefix = prefix.split('/')[-1]
+            #use the branch name as prefix
+            prefix = branch.split('/')[-1]
             script_name = f"{prefix}_{script_name}"
             logger.info(f"the new script name: {script_name}")
         #check to see if the script name exists in jamf
@@ -269,24 +269,24 @@ def push_ea_scripts():
 #run this thing
 if __name__ == "__main__":
     logger.info('reading environment variables')
-    url = os.environ['INPUT_JAMF_URL']
-    username = os.environ['INPUT_JAMF_USERNAME']
-    password = os.environ['INPUT_JAMF_PASSWORD']
-    script_dir = os.environ['INPUT_SCRIPT_DIR']
-    ea_script_dir = os.environ['INPUT_EA_SCRIPT_DIR']
-    workspace_dir = os.environ['GITHUB_WORKSPACE']
+    url = os.getenv('INPUT_JAMF_URL')
+    username = os.getenv('INPUT_JAMF_USERNAME')
+    password = os.getenv('INPUT_JAMF_PASSWORD')
+    script_dir = os.getenv('INPUT_SCRIPT_DIR')
+    ea_script_dir = os.getenv('INPUT_EA_SCRIPT_DIR')
+    workspace_dir = os.getenv('GITHUB_WORKSPACE')
     if script_dir != workspace_dir:
         script_dir = f"{workspace_dir}/{script_dir}"
-    prefix = os.environ['INPUT_PREFIX_NAME']
-    enable_prefix = os.environ['INPUT_ENABLE_PREFIX']
-    script_extensions = os.environ['INPUT_SCRIPT_EXTENSIONS']
+    prefix = os.getenv['INPUT_PREFIX']
+    branch = os.getenv('GITHUB_REF')
+    script_extensions = os.getenv('INPUT_SCRIPT_EXTENSIONS')
     script_extensions = script_extensions.split()
     logger.info(f"url is: {url}")
     logger.info(f"workspace dir is: {workspace_dir}")
     logger.info(f"script_dir is:  {script_dir}")
     logger.info(f"branch is: {prefix}")
     logger.info(f"scripts_extensions are: {script_extensions}")
-    if enable_prefix == 'false':
+    if prefix == 'false':
         logger.warning("prefix is disabled")
     else:
         logger.warning("prefix is enabled")
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     logger.info('grabing the token from jamf')
     token = get_jamf_token(url, username, password)
     #run the block to push the "normal" scripts to jamf
-    push_scripts(prefix)
+    push_scripts()
     #check to see if we have an EA scripts to push over
     logger.info(f"the default input type is {type(ea_script_dir)}")
     if ea_script_dir != False:

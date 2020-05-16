@@ -24,14 +24,10 @@ inputs:
         description: >
             extension for the types of scripts we'll be looking to upload defaults to .sh and .py files
         default: 'sh py'
-    prefix_name:
+    prefix:
         description: >
-            by default it's the branch that triggered the action, we're going to use this name to add a prefix to the script.
-        default: ${{ github.ref }}
-    enable_prefix:
-        description: >
-            wether to use the branch name as a prefix
-        default: true
+            Use the branch name as a prefix
+        default: false
 
 runs:
     using: 'docker'
