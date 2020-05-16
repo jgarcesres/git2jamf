@@ -45,7 +45,7 @@ def invalidate_jamf_token(url, token):
 
 #function to create a new script
 @logger.catch
-def create_jamf_script(payload):
+def create_jamf_script(url, token, payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.post(url='{}/uapi/v1/scripts'.format(url), headers=header, json=payload)
     if script_request.status_code == 201:
@@ -60,7 +60,7 @@ def create_jamf_script(payload):
 
 #function to update an already existing script
 @logger.catch
-def update_jamf_script(payload):
+def update_jamf_script(url, token, payload):
     header = { "Authorization": "Bearer {}".format(token) }
     script_request = requests.put(url='{}/uapi/v1/scripts/{}'.format(url, payload['id']), headers=header, json=payload)
     if script_request.status_code in range (200, 202):
@@ -75,7 +75,7 @@ def update_jamf_script(payload):
 
 #retrieves all scripts in a json
 @logger.catch
-def get_all_jamf_scripts(scripts = [], page = 0):
+def get_all_jamf_scripts(url, token, scripts = [], page = 0):
     header = { "Authorization": "Bearer {}".format(token) }
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
@@ -87,7 +87,7 @@ def get_all_jamf_scripts(scripts = [], page = 0):
         if (page*page_size) < script_list['totalCount']:
             logger.info("seems there's more to grab")
             scripts.extend(script_list['results'])
-            return get_all_jamf_scripts(scripts, page)
+            return get_all_jamf_scripts(url, token, scripts, page)
         else:
             logger.info("reached the end of our search")
             scripts.extend(script_list['results'])
@@ -102,7 +102,7 @@ def get_all_jamf_scripts(scripts = [], page = 0):
 
 #search for the script name and return the json that for it
 @logger.catch
-def find_jamf_script(script_name, page = 0):
+def find_jamf_script(url, token, script_name, page = 0):
     header = { "Authorization": "Bearer {}".format(token) }
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
@@ -116,7 +116,7 @@ def find_jamf_script(script_name, page = 0):
             return script_search[0]
         elif len(script_search) == 0 and (page*page_size) < script_list['totalCount']:
             logger.info("couldn't find the script in this page, seems there's more to look through")
-            return find_jamf_script(script_name, page+1)
+            return find_jamf_script(url, token, script_name, page+1)
         else:
             logger.info("did not find any script named {}".format(script_name))
             return "n/a"
@@ -218,7 +218,7 @@ def push_scripts():
     #continue if no dupes are found
     logger.success("found no duplicate script names, we can continue")
     logger.info('now checking against jamf for the list of scripts')
-    jamf_scripts = get_all_jamf_scripts()
+    jamf_scripts = get_all_jamf_scripts(url, token)
     logger.info("setting all script names to lower case to avoid false positives in our search.")
     logger.info("worry not, this won't affect the actual naming :)")
     #save the scripts name all in lower_case
@@ -247,7 +247,7 @@ def push_scripts():
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
                 payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", f"scriptContents":"{upload_script.read()}" } 
-                create_jamf_script(payload)
+                create_jamf_script(url, token, payload)
         elif len(script_search) == 1:
             jamf_script = script_search.pop()
             del jamf_script['lower_case_name']
@@ -259,13 +259,12 @@ def push_scripts():
                     logger.info("the local version is different than the one in jamf, updating jamf")
                     #the hash of the scripts is not the same, so we'll update it
                     jamf_script['scriptContents'] = script_text
-                    update_jamf_script(jamf_script)
+                    update_jamf_script(url, token, jamf_script)
                 else:
                     logger.info("since they are the same, we're skipping this one.")
-    
     logger.info("expiring the token so it can't be used further")
     invalidate_jamf_token(url, token)
-    logger.success("finished with the scripts, are there any EA scripts?!")   
+    logger.success("finished with the scripts, are there any EA scripts?!")  
 
 
 def push_ea_scripts():
@@ -296,7 +295,7 @@ if __name__ == "__main__":
     else:
         logger.warning('prefix is enabled')
     #run the block to push the "normal" scripts to jamf
-    push_scripts()
+    push_scripts() 
     #check to see if we have an EA scripts to push over
     if ea_script_dir != 'false':
         logger.info("we have some EA scripts to process")
