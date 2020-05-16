@@ -1,8 +1,8 @@
 # git2jamf [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-This action grabs the github work directory (or any of your choice) scans it for scripts and compares them against a pull of all scripts on jamf:
+This action grabs the github work directory (or any subdfolder of your choice) scans it for scripts and will compare with the scripts in jamf. It starts by comparing filename against the name of the script in jamf:
 * If it doesn't exist, it will create it
-* if it exists, it will compare the two and update it in jamf if they differ. Github is always treated as the source.
-* It will add a suffix with the `branch name_`  to a script. This can be disabled and probably should for syncs from master -> production.
+* if it exists, it will compare the hash of the body of both scripts and update it in jamf if they differ. Github is always treated as the source.
+* If enabled, it will add a suffix with the `branch name_`  to a script. 
 ## Inputs
 
 ### `jamf_url`
