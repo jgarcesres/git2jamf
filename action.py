@@ -226,7 +226,7 @@ def push_scripts():
         logger.info(f"script {count+1} of {len(local_scripts)}")
         logger.info(f"path of the script: {script}")
         script_name = get_script_name(script)
-        if prefix == "false":
+        if enable_prefix == "false":
             #don't use the prefix
             logger.info(f"script name is: {script_name}")
         else:
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     workspace_dir = os.getenv('GITHUB_WORKSPACE')
     if script_dir != workspace_dir:
         script_dir = f"{workspace_dir}/{script_dir}"
-    prefix = os.getenv('INPUT_PREFIX')
+    enable_prefix = os.getenv('INPUT_PREFIX')
     branch = os.getenv('GITHUB_REF')
     script_extensions = os.getenv('INPUT_SCRIPT_EXTENSIONS')
     script_extensions = script_extensions.split()
@@ -286,7 +286,7 @@ if __name__ == "__main__":
     logger.info(f"script_dir is:  {script_dir}")
     logger.info(f"branch is: {prefix}")
     logger.info(f"scripts_extensions are: {script_extensions}")
-    if prefix == 'false':
+    if enable_prefix == 'false':
         logger.warning("prefix is disabled")
     else:
         logger.warning("prefix is enabled")
