@@ -133,7 +133,7 @@ jobs:
           jamf_url: ${{ secrets.jamf_url }}
           jamf_username: ${{ secrets.jamf_username }}
           jamf_password: ${{ secrets.jamf_password }}
-          script_dir: '**/scripts'
+          script_dir: 'scripts'
 ```
 
 
