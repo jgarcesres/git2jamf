@@ -23,7 +23,7 @@ This action grabs the github work directory (or any subdfolder of your choice) s
 
 ### `script_extensions`
 
-**optional** the extensions for the types of files we'll be searching for. By default it tries to look for *.sh* and *.py* files. To change the behavior, separate each input with spaces and no periods. ie `sh py ps1`
+**optional** the extensions for the types of files we'll be searching for. By default it tries to look for `*.sh* and *.py*` files. To change the behavior, separate each extension with spaces and no periods. ie `sh py ps1`
 
 ### `prefix`
 
@@ -36,7 +36,7 @@ This action grabs the github work directory (or any subdfolder of your choice) s
 what scripts were updated
 
 ## Example usage with 2 instances
-you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers, up to you). You also will need 2 workflow files: one for pushes to the master branch and another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
+you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers). You also will need 2 workflow files: one for pushes to the master branch and another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
 
 ```yaml
 on:
