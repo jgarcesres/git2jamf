@@ -39,6 +39,7 @@ what scripts were updated
 you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers). You also will need 2 workflow files: one for pushes to the master branch and another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
 
 ```yaml
+name: git2jamf
 on:
   pull_request:
     branches:
@@ -50,11 +51,11 @@ on:
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
-    name: A job to push script changes to jamf
+    name: git2jamf
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: jamf_scripts 
+      - name: git2jamf 
         uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_test_url }}
@@ -63,6 +64,7 @@ jobs:
           script_dir: '**/scripts'
 ```
 ```yaml
+name: git2jamf_test
 on:
   push:
     branches: 
@@ -70,11 +72,11 @@ on:
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
-    name: A job to push script changes to production in jamf
+    name: git2jamf_test
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: jamf_scripts 
+      - name: git2jamf_test 
         uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_prod_url }}
@@ -88,6 +90,7 @@ jobs:
 The prefix remains enabled for the test branch. This might create a bit of "garbage" as the scripts that have a prefix won't be deleted automatically. If there's any interest in this route, I can maybe make something that deletes scripts that have a certain prefix when the merge to master happens.
 
 ```yaml
+name: git2jamf
 on:
   push:
     branches: 
@@ -98,11 +101,11 @@ on:
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
-    name: A job to push script changes to jamf
+    name: git2jamf
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: jamf_scripts 
+      - name: git2jamf
         uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_url }}
@@ -112,6 +115,7 @@ jobs:
           enable_prefix: true
 ```  
 ```yaml
+name: git2jamf
 on:
   pull_request:
     branches: 
@@ -119,11 +123,11 @@ on:
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
-    name: A job to push script changes to production in jamf
+    name: git2jamf_test
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: jamf_scripts 
+      - name: git2jamf_test
         uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_url }}
