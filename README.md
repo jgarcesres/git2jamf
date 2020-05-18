@@ -11,7 +11,7 @@ This action grabs the github work directory (or any subdfolder of your choice) s
 
 ### `jamf_username`
 
-**Required** the username to auth against jamf. *this user should have permission to update and create scripts.*
+**Required** the username to auth against jamf. **This user should have permission to update and create scripts.**
 
 ### `jamf_password`
 
