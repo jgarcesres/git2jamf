@@ -23,7 +23,7 @@ This action grabs the github work directory (or any subdfolder of your choice) s
 
 ### `script_extensions`
 
-**optional** the extensions for the types of files we'll be searching for. By default it tries to look for `*.sh* and *.py*` files. To change the behavior, separate each extension with spaces and no periods. ie `sh py ps1`
+**optional** the extensions for the types of files we'll be searching for. By default it tries to look for `*.sh and *.py` files. To change the behavior, separate each extension with spaces and no periods. ie `sh py ps1`
 
 ### `prefix`
 
@@ -62,7 +62,6 @@ jobs:
           jamf_password: ${{ secrets.jamf_test_password }}
           script_dir: '**/scripts'
 ```
-
 ```yaml
 on:
   push:
