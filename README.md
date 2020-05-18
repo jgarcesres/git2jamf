@@ -39,7 +39,7 @@ what scripts were updated
 you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers). You also will need 2 workflow files: one for pushes to the master branch and another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
 
 ```yaml
-name: git2jamf
+name: git2jamf_test
 on:
   pull_request:
     branches:
@@ -51,11 +51,11 @@ on:
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
-    name: git2jamf
+    name: git2jgit2jamf_testamf
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: git2jamf 
+      - name: git2jamf_test 
         uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_test_url }}
@@ -64,7 +64,7 @@ jobs:
           script_dir: '**/scripts'
 ```
 ```yaml
-name: git2jamf_test
+name: git2jamf
 on:
   push:
     branches: 
@@ -72,11 +72,11 @@ on:
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
-    name: git2jamf_test
+    name: git2jamf
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: git2jamf_test 
+      - name: git2jamf
         uses: jgarcesres/git2jamf@master
         with: 
           jamf_url: ${{ secrets.jamf_prod_url }}
