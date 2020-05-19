@@ -168,9 +168,9 @@ def update_ea_script(payload, id):
 @logger.catch
 def compare_scripts(new, old):
     md5_new = hashlib.md5(new.encode())
-    logger.info(f"hash of the of local file: {md5_new.hexdigest}") 
+    logger.info(f"hash of the of local file: {md5_new.hexdigest()}") 
     md5_old = hashlib.md5(old.encode())
-    logger.info(f"hash of the of local file: {md5_old.hexdigest}") 
+    logger.info(f"hash of the of local file: {md5_old.hexdigest()}") 
     if md5_new.hexdigest() == md5_old.hexdigest():
         logger.info("scripts are the same")
         return True
