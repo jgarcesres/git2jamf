@@ -168,9 +168,9 @@ def update_ea_script(payload, id):
 @logger.catch
 def compare_scripts(new, old):
     md5_new = hashlib.md5(new.encode())
-    logger.info(f"hash of the of local file: {md5_new.hexdigest()}") 
+    logger.info(f"hash of the of github script: {md5_new.hexdigest()}") 
     md5_old = hashlib.md5(old.encode())
-    logger.info(f"hash of the of local file: {md5_old.hexdigest()}") 
+    logger.info(f"hash of the of jamf script: {md5_old.hexdigest()}") 
     if md5_new.hexdigest() == md5_old.hexdigest():
         logger.info("scripts are the same")
         return True
@@ -261,7 +261,7 @@ def push_scripts():
                     jamf_script['scriptContents'] = script_text
                     update_jamf_script(url, token, jamf_script)
                 else:
-                    logger.info("since they are the same, we're skipping this one.")
+                    logger.info("we're skipping this one.")
     logger.info("expiring the token so it can't be used further")
     invalidate_jamf_token(url, token)
     logger.success("finished with the scripts, are there any EA scripts?!")  
