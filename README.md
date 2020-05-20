@@ -90,7 +90,7 @@ jobs:
 
 
 ## Example usage with one instance
-The prefix remains enabled for the test branch. This might create a bit of "garbage" as the scripts that have a prefix won't be deleted automatically. If there's any interest in this route, I can maybe make something that deletes scripts that have a certain prefix when the merge to master happens.
+The prefix remains enabled for the test branch. This might create a bit of "garbage" as the scripts that have a prefix won't be deleted automatically. 
 
 ```yaml
 name: git2jamf_test
