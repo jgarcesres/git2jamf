@@ -3,8 +3,11 @@ This action grabs the github work directory (or any subdfolder of your choice) s
 * If it doesn't exist, it will create it
 * if it exists, it will compare the hash of the body of both scripts and update it in jamf if they differ. Github is always treated as the source.
 * If enabled, it will add a suffix with the `branch name_`  to a script. 
-## Inputs
 
+## Future state
+I'm hoping to add the ability to delete scripts and to handle extension attributes. Suggestions are welcome!
+
+## Inputs
 ### `jamf_url`
 
 **Required** the url of your jamf instance
