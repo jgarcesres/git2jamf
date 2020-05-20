@@ -131,9 +131,6 @@ on:
   push:
     branches: 
       - test
-  pull_request:
-    branches:
-      - master
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
