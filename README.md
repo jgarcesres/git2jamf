@@ -4,7 +4,7 @@ This action grabs the github work directory (or any subdfolder of your choice) s
 It starts by comparing filename of the github script (without the extension) against the name of the script in jamf:
 * If it doesn't exist, it will create it
 * if it exists, it will compare the hash of the body of both scripts and update it in jamf if they differ. Github is always treated as the source.
-* If enabled, it will add a suffix with the `branch name_`  to a script. 
+* If enabled, it will add a prefix with the `branch name_`  to a script. 
 
 ## Future state
 I'm hoping to add the ability to delete scripts and to handle extension attributes. Suggestions are welcome!
