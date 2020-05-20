@@ -82,7 +82,7 @@ jobs:
           jamf_url: ${{ secrets.jamf_prod_url }}
           jamf_username: ${{ secrets.jamf_prod_username }}
           jamf_password: ${{ secrets.jamf_prod_password }}
-          script_dir: '**/Scripts'
+          script_dir: '**/scripts'
 ```
 
 
@@ -111,7 +111,7 @@ jobs:
           jamf_url: ${{ secrets.jamf_url }}
           jamf_username: ${{ secrets.jamf_username }}
           jamf_password: ${{ secrets.jamf_password }}
-          script_dir: scripts
+          script_dir: toplevelfolder/scripts
           enable_prefix: true
 ```  
 ```yaml
@@ -133,7 +133,7 @@ jobs:
           jamf_url: ${{ secrets.jamf_url }}
           jamf_username: ${{ secrets.jamf_username }}
           jamf_password: ${{ secrets.jamf_password }}
-          script_dir: 'scripts'
+          script_dir: toplevelfolder/scripts
 ```
 
 
