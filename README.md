@@ -40,8 +40,35 @@ I'm hoping to add the ability to delete scripts and to handle extension attribut
 
 what scripts were updated
 
+
+## Getting started.
+If possible, I recommend running this on a test instance first. If you can't, then try syncing just one folder with a small set of scripts so you can get a feel for how it works. First, you'll want to create the secrets that will be needed for this to work. You can do this in the settings of your repository, you'll reference those secrets in the workflow file. Now create the workflow file in `.github/workflows/git2jamf.yml`. You can use this example as a basis(replace the secret values for the names of the ones you created):
+
+```yaml
+name: git2jamf
+on:
+  push:
+    branches: 
+      - master
+jobs:
+  jamf_scripts:
+    runs-on: ubuntu-latest
+    name: git2jamf
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: git2jamf
+        uses: jgarcesres/git2jamf@master
+        with: 
+          jamf_url: ${{ secrets.jamf_test_url }}
+          jamf_username: ${{ secrets.jamf_test_username }}
+          jamf_password: ${{ secrets.jamf_test_password }}
+          script_dir: '**/scripts'
+```
+
+
 ## Example usage with 2 instances
-you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers). You also will need 2 workflow files: one for pushes to the master branch and another that goes to test. In this example, we disable prefix since we have 2 instances in jamf. We can keep the name of the scripts consistent between the two.
+you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers). You also will need 2 workflow files: one for pushes to the master branch and another that goes to test. 
 
 ```yaml
 name: git2jamf_test
