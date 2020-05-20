@@ -43,7 +43,7 @@ what scripts were updated
 
 ## Getting started.
 * First, you'll want to create the secrets that will be needed for this to work. You can do this in the settings of your repository, you'll reference those secrets in the workflow file. 
-* Now create the workflow file in `.github/workflows/git2jamf.yml`. 
+* Now create the workflow file in `.github/workflows/git2jamf.yml`
 * You can use the example bellow as a basis(replace the secret values for the names of the ones you created). In this example, the action runs only when a push is sent to master. You can customize it further using githubs [workflow documentation](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions)
 
 **NOTE**: If possible, I recommend running this on a test instance first. If you can't, then try syncing just one folder with a small set of scripts so you can get a feel for how it works.
