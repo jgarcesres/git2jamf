@@ -1,5 +1,5 @@
 # git2jamf [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-This action grabs the github work directory (or any subdfolder of your choice) scans it for scripts and will create or update those scripts in jamf.
+This action grabs the github repository (or any subdfolder of your choice) scans it for scripts and will create or update those scripts in jamf.
 
 It starts by comparing filename of the github script (without the extension) against the name of the script in jamf:
 * If it doesn't exist, it will create it
