@@ -19,7 +19,7 @@ This action grabs the github work directory (or any subdfolder of your choice) s
 
 ### `script_dir`
 
-**optional** the directory where the scripts to upload will be, this could be a subdirectoy in your repository `path/to/scripts`. By default it will try to sync all .sh and .py files from the repo, so it's **greatly recommended to provide this input**, this is a regex field so you can potentially look for multiple subdirectories, just provide a name like `**/scripts`
+**optional** the directory where the scripts to upload will be, this could be a subdirectoy in your repository `path/to/scripts`. By default it will try to sync all .sh and .py files from the repo, so it's **greatly recommended to provide this input**,  you can look for multiple subdirectories that share the same name, just provide a name like `**/scripts`
 
 ### `script_extensions`
 
