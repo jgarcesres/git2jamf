@@ -262,7 +262,7 @@ def push_scripts():
             logger.info("it doesn't exist, lets create it")
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
-                payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":f"{upload_script.read()}"} 
+                payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", f"scriptContents":"{upload_script.read()}"} 
                 create_jamf_script(url, token, payload)
         elif len(script_search) == 1:
             jamf_script = script_search.pop()
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     logger.info(f"url is: {url}")
     logger.info(f"workspace dir is: {workspace_dir}")
     logger.info(f"script_dir is:  {script_dir}")
-    logger.info(f"branch is: {branch}")
+    logger.info(f"branch is set to: {branch}")
     logger.info(f"script_deltion is: {delete}")
     logger.info(f"scripts_extensions are: {script_extensions}")
     if enable_prefix == 'false':
