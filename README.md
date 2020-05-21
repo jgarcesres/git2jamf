@@ -50,7 +50,7 @@ what scripts were updated
 ## Getting started.
 * First, you'll want to create the secrets that will be needed for this to work. You can do this in the settings of your repository, you'll reference those secrets in the workflow file. 
 * Now create the workflow file in `.github/workflows/git2jamf.yml`
-* You can use the example bellow as a basis(replace the secret values for the names of the ones you created). In this example, the action runs only when a push is sent to master. You can customize it further using githubs [workflow documentation](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions)
+* You can use the example bellow as a basis(replace the secret values for the names of the ones you created). In this example, the action runs only when a push is sent to master and it's attempting to sync a folder called `scripts` at the root of the repository. You can customize it further using githubs [workflow documentation](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions)
 
 **NOTE**: If possible, I recommend running this on a test instance first. If you can't, then try syncing just one folder with a small set of scripts so you can get a feel for how it works.
 
@@ -73,7 +73,7 @@ jobs:
           jamf_url: ${{ secrets.jamf_test_url }}
           jamf_username: ${{ secrets.jamf_test_username }}
           jamf_password: ${{ secrets.jamf_test_password }}
-          script_dir: '**/scripts'
+          script_dir: 'scripts'
 ```
 
 
