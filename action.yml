@@ -28,6 +28,11 @@ inputs:
         description: >
             Use the branch name as a prefix
         default: false
+    delete:
+        description: >
+            Should we delete scripts that are not in github? Careful when turning this on!
+        default: false
+
 
 runs:
     using: 'docker'

@@ -16,7 +16,7 @@ logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss
 #function to get the token given the url, usrername and password
 @logger.catch
 def get_jamf_token(url, username, password):
-    token_request = requests.post(url=f'{url}/uapi/auth/tokens', auth = (username, password))
+    token_request = requests.post(url=f"{url}/uapi/auth/tokens", auth = (username, password))
     if token_request.status_code == requests.codes.ok:
         logger.success(f"got the token! it expires in: {token_request.json()['expires']}")
         return token_request.json()['token']
@@ -262,7 +262,7 @@ def push_scripts():
             logger.info("it doesn't exist, lets create it")
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
-                payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", f"scriptContents":"{upload_script.read()}" } 
+                payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", f"scriptContents":f"{upload_script.read()}"} 
                 create_jamf_script(url, token, payload)
         elif len(script_search) == 1:
             jamf_script = script_search.pop()
@@ -279,7 +279,12 @@ def push_scripts():
                     update_jamf_script(url, token, jamf_script)
                 else:
                     logger.info("we're skipping this one.")
-        logger.info(f"we have {len(scripts['to_delete'])} scripts left to delete")    
+    if delete == 'true':
+        logger.info(f"we have {len(scripts['to_delete'])} scripts left to delete")
+        for script in scripts['to_delete']:
+            logger.info(f"attempting to delete script {script['name']} in jamf")
+            delete_jamf_script(url, token, script['id'])
+      
     logger.info("expiring the token so it can't be used further")
     invalidate_jamf_token(url, token)
     logger.success("finished with the scripts, are there any EA scripts?!")  
@@ -302,11 +307,13 @@ if __name__ == "__main__":
     enable_prefix = os.getenv('INPUT_PREFIX')
     branch = os.getenv('GITHUB_REF')
     script_extensions = os.getenv('INPUT_SCRIPT_EXTENSIONS')
+    delete = os.getenv('INPUT_DELETE')
     script_extensions = script_extensions.split()
     logger.info(f"url is: {url}")
     logger.info(f"workspace dir is: {workspace_dir}")
     logger.info(f"script_dir is:  {script_dir}")
     logger.info(f"branch is: {branch}")
+    logger.info(f"script_deltion is: {delete}")
     logger.info(f"scripts_extensions are: {script_extensions}")
     if enable_prefix == 'false':
         logger.warning('prefix is disabled')
