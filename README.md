@@ -9,7 +9,7 @@ It starts by comparing filename of the github script (without the extension) aga
 ## Future state
 * handle extension attributes. 
 * slack notifications
-Suggestions are welcome!
+* suggestions are welcome!
 
 ## Inputs
 ### `jamf_url`
