@@ -7,7 +7,9 @@ It starts by comparing filename of the github script (without the extension) aga
 * If enabled, it will add a prefix with the `branch name_`  to a script. 
 
 ## Future state
-I'm hoping to add the ability to delete scripts and to handle extension attributes. Suggestions are welcome!
+* handle extension attributes. 
+* slack notifications
+Suggestions are welcome!
 
 ## Inputs
 ### `jamf_url`
