@@ -34,6 +34,10 @@ I'm hoping to add the ability to delete scripts and to handle extension attribut
 
 **optional** by default this will be `false`, it will add the branch name as a prefix to the script before uploading it. 
 
+### `delete`
+
+**optional** by default this will be `false`, if enabled it will delete any scripts that are not found in github. 
+
 ## Outputs
 
 ### `results`
