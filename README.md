@@ -32,13 +32,13 @@ Suggestions are welcome!
 
 **optional** the extensions for the types of files we'll be searching for. By default it tries to look for `*.sh and *.py` files. To change the behavior, separate each extension with spaces and no periods. ie `sh py ps1`
 
-### `prefix`
-
-**optional** by default this will be `false`, it will add the branch name as a prefix to the script before uploading it. 
-
 ### `delete`
 
 **optional** by default this will be `false`, if enabled it will delete any scripts that are not found in github. **Don't enable this and the prefix at the same time if you're running multiple workflows, they're not compatible**
+
+### `prefix`
+
+**optional** by default this will be `false`, it will add the branch name as a prefix to the script before uploading it. 
 
 ## Outputs
 
