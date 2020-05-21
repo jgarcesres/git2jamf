@@ -1,7 +1,6 @@
 name: 'JAMF scripts'
 description: >
-    creates or updates scripts in jamf from a given directory, using the filename to name the script. 
-    it will create suffixes using the branch name for any other branch that's not master
+    creates, updates and delets scripts in jamf from your github repository
 inputs:
     jamf_url:
         description: 'url of your jamf instance'
