@@ -1,4 +1,4 @@
-name: 'JAMF scripts'
+name: 'git2jamf'
 description: >
     creates, updates and delets scripts in jamf from your github repository
 inputs:
