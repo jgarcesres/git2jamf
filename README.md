@@ -5,6 +5,7 @@ It starts by comparing filename of the github script (without the extension) aga
 * If it doesn't exist, it will create it
 * if it exists, it will compare the hash of the body of both scripts and update it in jamf if they differ. Github is always treated as the source.
 * If enabled, it will add a prefix with the `branch name_`  to a script. 
+After creating and updating scripts, if enabled, it can delete any leftover script that is not found in github, thus keeping Github as your one source.
 
 ## Future state
 * handle extension attributes. 
