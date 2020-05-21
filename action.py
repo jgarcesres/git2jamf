@@ -46,14 +46,14 @@ def invalidate_jamf_token(url, token):
 #function to create a new script
 @logger.catch
 def create_jamf_script(url, token, payload):
-    header = { f"Authorization": "Bearer {token}" }
+    header = { "Authorization": f"Bearer {token}" }
     script_request = requests.post(url=f"{url}/uapi/v1/scripts", headers=header, json=payload)
     if script_request.status_code == requests.codes.created:
         logger.success("script created")
         return True
     else:
         logger.warning("failed to create the script")
-        logger.debug(f"status code for put: {script_request.status_code}")
+        logger.debug(f"status code for create: {script_request.status_code}")
         logger.warning(script_request.text)
         sys.exit(1)
 
@@ -262,7 +262,7 @@ def push_scripts():
             logger.info("it doesn't exist, lets create it")
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
-                payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", f"scriptContents":"{upload_script.read()}"} 
+                payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":f"{upload_script.read()}"} 
                 create_jamf_script(url, token, payload)
         elif len(script_search) == 1:
             jamf_script = script_search.pop()
