@@ -240,7 +240,7 @@ def push_scripts():
     for script in scripts['jamf']:
         script['lower_case_name'] = script['name'].lower() 
     #make a copy of the jamf scripts, we'll use this to determine which to delete later on
-    script['to_delete'] = scripts['jamf']
+    scripts['to_delete'] = scripts['jamf']
     logger.info("processing each script now")
     for count, script in enumerate(scripts['github']):
         logger.info("----------------------")
@@ -267,6 +267,7 @@ def push_scripts():
         elif len(script_search) == 1:
             jamf_script = script_search.pop()
             del jamf_script['lower_case_name']
+            scripts['to_delete'].remove(jamf_script)
             logger.info("it does exist, lets compare them")
             #it does exists, lets see if has changed
             with open(script, 'r') as upload_script:
@@ -278,7 +279,7 @@ def push_scripts():
                     update_jamf_script(url, token, jamf_script)
                 else:
                     logger.info("we're skipping this one.")
-            
+        logger.info(f"we have {len(scripts['to_delete'])} scripts left to delete")    
     logger.info("expiring the token so it can't be used further")
     invalidate_jamf_token(url, token)
     logger.success("finished with the scripts, are there any EA scripts?!")  
