@@ -76,7 +76,7 @@ def update_jamf_script(url, token, payload):
 def delete_jamf_script(url, token, id):
     header = { "Authorization": f"Bearer {token}" }
     script_request = requests.delete(url=f"{url}/uapi/v1/scripts/{id}", headers=header)
-    if script_request.status_code in range (requests.codes.ok, requests.codes.accepted):
+    if script_request.status_code in range (requests.codes.ok, requests.codes.accepted, requests.codes.no_content):
         logger.success("script was deleted succesfully")
         return True
     else:
