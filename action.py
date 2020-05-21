@@ -280,7 +280,7 @@ def push_scripts():
                 else:
                     logger.info("we're skipping this one.")
     if delete == 'true':
-        logger.info(f"we have {len(scripts['to_delete'])} scripts left to delete")
+        logger.warning(f"we have {len(scripts['to_delete'])} scripts left to delete")
         for script in scripts['to_delete']:
             logger.info(f"attempting to delete script {script['name']} in jamf")
             delete_jamf_script(url, token, script['id'])
