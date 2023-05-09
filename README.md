@@ -70,7 +70,7 @@ jobs:
     name: git2jamf
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: git2jamf
         uses: jgarcesres/git2jamf@master
         with: 
@@ -100,7 +100,7 @@ jobs:
     name: git2jgit2jamf_testamf
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: git2jamf_test 
         uses: jgarcesres/git2jamf@master
         with: 
@@ -121,7 +121,7 @@ jobs:
     name: git2jamf
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: git2jamf
         uses: jgarcesres/git2jamf@master
         with: 
@@ -147,7 +147,7 @@ jobs:
     name: git2jamf_test
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: git2jamf_test
         uses: jgarcesres/git2jamf@master
         with: 
@@ -169,7 +169,7 @@ jobs:
     name: git2jamf
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: git2jamf
         uses: jgarcesres/git2jamf@master
         with: 
