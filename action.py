@@ -319,7 +319,7 @@ def push_ea_scripts():
 if __name__ == "__main__":
     logger.info('reading environment variables')
     url = os.getenv('INPUT_JAMF_URL')
-    auth_type = os.getenv("INPUT_AUTH_TYPE", "auth")
+    auth_type = os.getenv("INPUT_JAMF_AUTH_TYPE", "auth")
     if auth_type == "auth":
         username = os.getenv('INPUT_JAMF_USERNAME')
         password = os.getenv('INPUT_JAMF_PASSWORD')
