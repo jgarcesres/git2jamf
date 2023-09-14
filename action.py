@@ -324,8 +324,8 @@ if __name__ == "__main__":
         username = os.getenv('INPUT_JAMF_USERNAME')
         password = os.getenv('INPUT_JAMF_PASSWORD')
     else:
-        client_id = os.getenv("INPUT_JAMF_CLIENT_ID")
-        client_secret = os.getenv("INPUT_JAMF_CLIENT_SECRET")
+        client_id = os.getenv("INPUT_JAMF_USERNAME")
+        client_secret = os.getenv("INPUT_JAMF_PASSWORD")
     script_dir = os.getenv('INPUT_SCRIPT_DIR')
     ea_script_dir = os.getenv('INPUT_EA_SCRIPT_DIR')
     workspace_dir = os.getenv('GITHUB_WORKSPACE')
