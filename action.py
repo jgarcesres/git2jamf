@@ -344,7 +344,7 @@ if __name__ == "__main__":
     if enable_prefix == 'false':
         logger.warning('prefix is disabled')
     else:
-        logger.warning(f'prefix enabled, using: {branch.split('/')[-1]}')
+        logger.warning(f"prefix enabled, using: {branch.split('/')[-1]}")
     #run the block to push the "normal" scripts to jamf
     push_scripts() 
     #check to see if we have an EA scripts to push over
