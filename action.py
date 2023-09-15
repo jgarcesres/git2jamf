@@ -242,19 +242,15 @@ def push_scripts():
     scripts['github_simple_name'] = []
     for script in scripts['github']:
         scripts['github_simple_name'].append(get_script_name(script).lower())
-
-    logger.info('doublechecking for duplicate names')
-    dupes = False
+    logger.info('doublechecking for duplicate script names')
     for count, script in enumerate(scripts['github_simple_name']):
         if scripts['github_simple_name'].count(script) >= 2:
-            dupes = True
-            logger.error("conflicting script name")
-            logger.error(scripts['github'][count])	            
-    if dupes == True:
-        sys.exit(1)
+            logger.error(f"the script name {script} is duplicated {scripts['github_simple_name'].count(script)} times, please give it a unique name")
+            #logger.error(scripts['github'][count])	            
+            sys.exit(1)
     #continue if no dupes are found
-    logger.success("found no duplicate script names, we can continue")
-    logger.info('now checking against jamf for the list of scripts')
+    logger.success("nice, no duplicate script names, we can continue")
+    logger.info('now checking jamf for its list of scripts')
     scripts['jamf'] =  get_all_jamf_scripts(url, token)
     logger.info("setting all script names to lower case to avoid false positives in our search.")
     logger.info("worry not, this won't affect the actual naming :)")
@@ -319,13 +315,16 @@ def push_ea_scripts():
 if __name__ == "__main__":
     logger.info('reading environment variables')
     url = os.getenv('INPUT_JAMF_URL')
-    auth_type = os.getenv("INPUT_JAMF_AUTH_TYPE", "auth")
+    auth_type = os.getenv("INPUT_JAMF_AUTH_TYPE")
     if auth_type == "auth":
         username = os.getenv('INPUT_JAMF_USERNAME')
         password = os.getenv('INPUT_JAMF_PASSWORD')
-    else:
+    elif auth_type == "oauth":
         client_id = os.getenv("INPUT_JAMF_USERNAME")
         client_secret = os.getenv("INPUT_JAMF_PASSWORD")
+    else:
+        logger.error("no valid auth_type, use 'auth' or 'oauth'")
+        sys.exit(1)
     script_dir = os.getenv('INPUT_SCRIPT_DIR')
     ea_script_dir = os.getenv('INPUT_EA_SCRIPT_DIR')
     workspace_dir = os.getenv('GITHUB_WORKSPACE')
@@ -340,12 +339,12 @@ if __name__ == "__main__":
     logger.info(f"workspace dir is: {workspace_dir}")
     logger.info(f"script_dir is:  {script_dir}")
     logger.info(f"branch is set to: {branch}")
-    logger.info(f"script_deltion is: {delete}")
+    logger.info(f"script_deletion is: {delete}")
     logger.info(f"scripts_extensions are: {script_extensions}")
     if enable_prefix == 'false':
         logger.warning('prefix is disabled')
     else:
-        logger.warning('prefix is enabled')
+        logger.warning(f'prefix enabled, using: {branch.split('/')[-1]}')
     #run the block to push the "normal" scripts to jamf
     push_scripts() 
     #check to see if we have an EA scripts to push over
