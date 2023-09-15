@@ -12,6 +12,7 @@ from loguru import logger
 logger.remove()
 logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss!UTC}</blue>: <lvl>{message}</lvl>")
 
+
 #function to get the token
 @logger.catch
 def get_jamf_token(url, auth_type, username, password):
@@ -34,10 +35,11 @@ def get_jamf_token(url, auth_type, username, password):
         logger.error(token_request.text)
         raise Exception("failed to retrieve a valid token, please check the credentials")
 
+
 #function to invalidate a token so it can't be use after we're done
 @logger.catch
 def invalidate_jamf_token(url, token):
-    header = { "Authorization": f"Bearer {token}" }
+    header = {"Authorization": f"Bearer {token}"}
     token_request = requests.post(url=f"{url}/uapi/auth/invalidateToken", headers=header)
     if token_request.status_code == requests.codes.no_content:
         logger.success("token invalidated succesfully")
@@ -46,10 +48,11 @@ def invalidate_jamf_token(url, token):
         logger.warning("failed to invalidate the token, maybe it's already expired?")
         logger.warning(token_request.text)
 
+
 #function to create a new script
 @logger.catch
 def create_jamf_script(url, token, payload):
-    header = { "Authorization": f"Bearer {token}" }
+    header = {"Authorization": f"Bearer {token}"}
     script_request = requests.post(url=f"{url}/uapi/v1/scripts", headers=header, json=payload)
     if script_request.status_code == requests.codes.created:
         logger.success("script created")
@@ -64,7 +67,7 @@ def create_jamf_script(url, token, payload):
 #function to update an already existing script
 @logger.catch
 def update_jamf_script(url, token, payload):
-    header = { "Authorization": f"Bearer {token}" }
+    header = {"Authorization": f"Bearer {token}"}
     script_request = requests.put(url=f"{url}/uapi/v1/scripts/{payload['id']}", headers=header, json=payload)
     if script_request.status_code in [requests.codes.accepted, requests.codes.ok]:
         logger.success("script was updated succesfully")
@@ -75,9 +78,10 @@ def update_jamf_script(url, token, payload):
         logger.warning(script_request.text)
         sys.exit(1)
 
+
 @logger.catch
 def delete_jamf_script(url, token, id):
-    header = { "Authorization": f"Bearer {token}" }
+    header = {"Authorization": f"Bearer {token}"}
     script_request = requests.delete(url=f"{url}/uapi/v1/scripts/{id}", headers=header)
     if script_request.status_code in  [requests.codes.ok, requests.codes.accepted, requests.codes.no_content]:
         logger.success("script was deleted succesfully")
@@ -92,7 +96,7 @@ def delete_jamf_script(url, token, id):
 #retrieves all scripts in a json
 @logger.catch
 def get_all_jamf_scripts(url, token, scripts = [], page = 0):
-    header = { "Authorization": f"Bearer {token}" }
+    header = {"Authorization": f"Bearer {token}"}
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
     script_list = requests.get(url=f"{url}/uapi/v1/scripts", headers=header, params=params)
@@ -119,7 +123,7 @@ def get_all_jamf_scripts(url, token, scripts = [], page = 0):
 #search for the script name and return the json that for it
 @logger.catch
 def find_jamf_script(url, token, script_name, page = 0):
-    header = { f"Authorization": "Bearer {token}" }
+    header = {"Authorization": f"Bearer {token}"}
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
     script_list = requests.get(url=f"{url}/uapi/v1/scripts", headers=header, params=params)
@@ -127,7 +131,7 @@ def find_jamf_script(url, token, script_name, page = 0):
         script_list = script_list.json()
         logger.info(f"we have searched {len(script_list['results'])+page} of {script_list['totalCount']} results")
         script_search = jmespath.search(f"results[?name == '{script_name}']", script_list)
-        if len(script_search) == 1 :
+        if len(script_search) == 1:
             logger.info('found the script, returning it')
             return script_search[0]
         elif len(script_search) == 0 and (page*page_size) < script_list['totalCount']:
@@ -142,10 +146,11 @@ def find_jamf_script(url, token, script_name, page = 0):
         logger.error(script_list.text)
         raise Exception("failed to find the script, please investigate!")
 
+
 #function to find a EA script using the filename as the script name
 @logger.catch
 def find_ea_script(ea_name):
-    ea_script = requests.get(url=f"{url}/JSSResource/computerextensionattributes/name/{ea_name}", auth=(username,password))
+    ea_script = requests.get(url = f"{url}/JSSResource/computerextensionattributes/name/{ea_name}", auth=(username,password))
     if ea_script.status_code == requests.codes.ok:
         return ea_script.json()['computer_extension_attribute']
     elif ea_script.status_code == requests.codes.not_found:
@@ -155,18 +160,20 @@ def find_ea_script(ea_name):
         logger.error("encountered an error retriving the extension attribute, stopping")
         logger.error(ea_script.text)
         raise Exception("encountered an error retriving the extension attribute, stopping")
-        
+
+
 #function to create EA script
 @logger.catch
 def create_ea_script(payload, id):
     headers = {"Accept": "text/xml", "Content-Type": "text/xml"}
-    ea_script = requests.post(url=f"{url}/JSSResource/computerextensionattributes/id/{id}", json=payload, auth=(username,password))
+    ea_script = requests.post(url = f"{url}/JSSResource/computerextensionattributes/id/{id}", json=payload, auth=(username,password))
     if ea_script.status_code == requests.codes.ok:
         return "success"
     else:
         logger.error("encountered an error creating the extension attribute, stopping")
         logger.error(ea_script.text)
         raise Exception("encountered an error creating the extension attribute, stopping")
+
 
 #function to update existin EA script
 @logger.catch
@@ -179,6 +186,7 @@ def update_ea_script(payload, id):
         logger.error("encountered an error creating the extension attribute, stopping")
         logger.error(ea_script.text)
         raise Exception("encountered an error creating the extension attribute, stopping")
+
 
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
 @logger.catch
@@ -194,6 +202,7 @@ def compare_scripts(new, old):
         logger.warning("scripts are different")
         return False
 
+
 #retrieves list of files given a folder path and the list of valid file extensions to look for
 @logger.catch
 def find_local_scripts(script_dir, script_extensions):
@@ -205,10 +214,12 @@ def find_local_scripts(script_dir, script_extensions):
     logger.info(script_list)
     return script_list
 
+
 #strips out the path and extension to get the scripts name
 @logger.catch
 def get_script_name(script_path):
     return script_path.split('/')[-1].rsplit('.', 1)[0]
+
 
 @logger.catch
 def push_scripts():
@@ -227,7 +238,7 @@ def push_scripts():
     for count, script in enumerate(scripts['github_simple_name']):
         if scripts['github_simple_name'].count(script) >= 2:
             logger.error(f"the script name {script} is duplicated {scripts['github_simple_name'].count(script)} times, please give it a unique name")
-            #logger.error(scripts['github'][count])	            
+            #logger.error(scripts['github'][count])
             sys.exit(1)
     #continue if no dupes are found
     logger.success("nice, no duplicate script names, we can continue")
@@ -292,6 +303,7 @@ def push_scripts():
 def push_ea_scripts():
     return ""
 
+
 #run this thing
 if __name__ == "__main__":
     logger.info('reading environment variables')
@@ -334,4 +346,3 @@ if __name__ == "__main__":
         logger.warning("no EA script folder set, skipping")
 
     logger.success("we're done!")
-
