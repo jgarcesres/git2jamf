@@ -12,33 +12,17 @@ from loguru import logger
 logger.remove()
 logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss!UTC}</blue>: <lvl>{message}</lvl>")
 
-
-#function to get the token given the url, username and password
+#function to get the token
 @logger.catch
-def get_jamf_token(url, username, password):
-    token_request = requests.post(url=f"{url}/uapi/auth/tokens", auth = (username, password))
+def get_jamf_token(url, auth_type, username, password):
+    if auth_type == "auth":
+        token_request = requests.post(url=f"{url}/uapi/auth/tokens", auth = (username, password))
+    elif auth_type =='oauth':
+        data = {"client_id": username,"client_secret": password, "grant_type": "client_credentials"}
+        token_request = requests.post(url=f"{url}/api/oauth/token", data=data)
     if token_request.status_code == requests.codes.ok:
         logger.success(f"got the token! it expires in: {token_request.json()['expires']}")
         return token_request.json()['token']
-    elif token_request.status_code == requests.codes.not_found:
-        logger.error('failed to retrieve a valid token, please check the url')
-        raise Exception("failed to retrieve a valid token, please check the credentials")   
-    elif token_request.status_code == requests.codes.unauthorized:
-        logger.error('failed to retrieve a valid token, please check the credentials')
-        raise Exception("failed to retrieve a valid token, please check the credentials")      
-    else:
-        logger.error('failed to retrieve a valid token')
-        logger.error(token_request.text)
-        raise Exception("failed to retrieve a valid token, please check the credentials")
-
-#function to get the token via oauth
-@logger.catch
-def get_jamf_oauth_token(url, client_id, client_secret):
-    data = {"client_id": client_id,"client_secret": client_secret, "grant_type": "client_credentials"}
-    token_request = requests.post(url=f"{url}/api/oauth/token", data=data)
-    if token_request.status_code == requests.codes.ok:
-        logger.success(f"got the token! it expires in: {token_request.json()['expires']}")
-        return token_request.json()['access_token']
     elif token_request.status_code == requests.codes.not_found:
         logger.error('failed to retrieve a valid token, please check the url')
         raise Exception("failed to retrieve a valid token, please check the credentials")   
@@ -230,10 +214,7 @@ def get_script_name(script_path):
 def push_scripts():
     #grab the token from jamf
     logger.info('grabing the token from jamf')
-    if auth_type == "auth":
-        token = get_jamf_token(url, username, password)
-    else:
-        token = get_jamf_oauth_token(url, client_id, client_secret)
+    token = get_jamf_token(url,auth_type, username, password)
     logger.info('checking the list of local scripts to upload or create')
     scripts = {}
     #this retrives the full path of the scripts we're trying to sync from github
@@ -316,15 +297,13 @@ if __name__ == "__main__":
     logger.info('reading environment variables')
     url = os.getenv('INPUT_JAMF_URL')
     auth_type = os.getenv("INPUT_JAMF_AUTH_TYPE")
-    if auth_type == "auth":
-        username = os.getenv('INPUT_JAMF_USERNAME')
-        password = os.getenv('INPUT_JAMF_PASSWORD')
-    elif auth_type == "oauth":
-        client_id = os.getenv("INPUT_JAMF_USERNAME")
-        client_secret = os.getenv("INPUT_JAMF_PASSWORD")
-    else:
-        logger.error("no valid auth_type, use 'auth' or 'oauth'")
-        sys.exit(1)
+    if auth_type not in ["auth","oauth"]:
+        logger.error("please use 'auth' or 'oauth' as they auth_type")
+    #if using oauth, we're just going to re-use the same variables as they are similar enough. 
+    #client_id is username
+    username = os.getenv('INPUT_JAMF_USERNAME')
+    #client_secret is password
+    password = os.getenv('INPUT_JAMF_PASSWORD')
     script_dir = os.getenv('INPUT_SCRIPT_DIR')
     ea_script_dir = os.getenv('INPUT_EA_SCRIPT_DIR')
     workspace_dir = os.getenv('GITHUB_WORKSPACE')
