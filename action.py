@@ -17,12 +17,15 @@ logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss
 @logger.catch
 def get_jamf_token(url, auth_type, username, password):
     if auth_type == "auth":
-        token_request = requests.post(url=f"{url}/uapi/auth/tokens", auth = (username, password))
+        token_request = requests.post(url=f"{url}/uapi/auth/tokens", auth=(username,password))
     elif auth_type =='oauth':
         data = {"client_id": username,"client_secret": password, "grant_type": "client_credentials"}
         token_request = requests.post(url=f"{url}/api/oauth/token", data=data)
     if token_request.status_code == requests.codes.ok:
-        logger.success(f"got the token! it expires in: {token_request.json()['expires']}")
+        if auth_type == "auth":
+            logger.success(f"got the token! it expires in: {token_request.json()['expires']}")
+        elif auth_type == "oauth":
+            logger.success(f"got the token! it expires in: {token_request.json()['expires_in']}")
         return token_request.json()['token']
     elif token_request.status_code == requests.codes.not_found:
         logger.error('failed to retrieve a valid token, please check the url')
