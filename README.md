@@ -18,13 +18,17 @@ After creating and updating scripts, if enabled, it can delete any leftover scri
 
 **Required** the url of your jamf instance
 
+### `jamf_auth_type`
+
+**Optional** Defaults to `auth` but can be set to `oauth` to use `client_id` and `client_secret` instead of a username and password.
+
 ### `jamf_username`
 
-**Required** the username to auth against jamf. **This user should have permission to update and create scripts.**
+**Required** the username to auth against jamf. If `auth_type` is set to `oauth`, this is the `client_id` . **This user should have permission to update and create scripts.**
 
 ### `jamf_password`
 
-**Required** password for the user
+**Required** password for the user. If `auth_type` is set to `oauth`, this is the `client_secret`
 
 ### `script_dir`
 
