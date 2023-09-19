@@ -24,10 +24,10 @@ def get_jamf_token(url, auth_type, username, password):
     if token_request.status_code == requests.codes.ok:
         if auth_type == "auth":
             logger.success(f"got the token! it expires in: {token_request.json()['expires']}")
-            token_request.json()['token']
+            return token_request.json()['token']
         elif auth_type == "oauth":
             logger.success(f"got the token! it expires in: {token_request.json()['expires_in']}")
-            token_request.json()['access_token']
+            return token_request.json()['access_token']
     elif token_request.status_code == requests.codes.not_found:
         logger.error('failed to retrieve a valid token, please check the url')
         raise Exception("failed to retrieve a valid token, please check the credentials")   
