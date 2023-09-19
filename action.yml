@@ -11,6 +11,9 @@ inputs:
     jamf_password:
         description: 'password to auth against jamf'
         required: true
+    jamf_auth_type:
+        description: 'auth for traditional username/pwd or oauth for clientid an secret'
+        default: auth
     script_dir:
         description: >
             the directory where the scripts to process are defaults to the github.workspace environment variable
