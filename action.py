@@ -17,7 +17,7 @@ logger.add(sys.stdout, colorize=True, level="INFO", format="<blue>{time:HH:mm:ss
 @logger.catch
 def get_jamf_token(url, auth_type, username, password):
     if auth_type == "auth":
-        token_request = requests.post(url=f"{url}/uapi/auth/tokens", auth=(username,password))
+        token_request = requests.post(url=f"{url}/api/v1/auth/token", auth=(username,password))
     elif auth_type =='oauth':
         data = {"client_id": username,"client_secret": password, "grant_type": "client_credentials"}
         token_request = requests.post(url=f"{url}/api/oauth/token", data=data)
@@ -44,7 +44,7 @@ def get_jamf_token(url, auth_type, username, password):
 @logger.catch
 def invalidate_jamf_token(url, token):
     header = {"Authorization": f"Bearer {token}"}
-    token_request = requests.post(url=f"{url}/uapi/auth/invalidateToken", headers=header)
+    token_request = requests.post(url=f"{url}/api/v1/auth/invalidate-token", headers=header)
     if token_request.status_code == requests.codes.no_content:
         logger.success("token invalidated succesfully")
         return True
