@@ -57,7 +57,7 @@ what scripts were updated
 * First, you'll want to create the secrets that will be needed for this to work. You can do this in the settings of your repository, you'll reference those secrets in the workflow file. 
 * Now create the workflow file in `.github/workflows/git2jamf.yml`
 * You can use the example bellow as a basis(replace the secret values for the names of the ones you created). 
-* In this example, the action runs only when a push is sent to master and it's attempting to sync a folder called `scripts` at the root of the repository. 
+* In this example, the action runs only when a push is sent to main and it's attempting to sync a folder called `scripts` at the root of the repository. 
 * You can customize it further using githubs [workflow documentation](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions)
 
 **NOTE**: If possible, I recommend running this on a test instance first. If you can't, then try syncing just one folder with a small set of scripts so you can get a feel for how it works.
@@ -67,7 +67,7 @@ name: git2jamf
 on:
   push:
     branches: 
-      - master
+      - main
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
@@ -76,7 +76,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: git2jamf
-        uses: jgarcesres/git2jamf@master
+        uses: jgarcesres/git2jamf@main
         with: 
           jamf_url: ${{ secrets.jamf_test_url }}
           jamf_username: ${{ secrets.jamf_test_username }}
@@ -86,14 +86,14 @@ jobs:
 
 
 ## Example usage with 2 instances
-you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers). You also will need 2 workflow files: one for pushes to the master branch and another that goes to test. 
+you would probably have 2 sets of secrets, with url and credentials for each instance(or share the same user creds across both servers). You also will need 2 workflow files: one for pushes to the main branch and another that goes to test. 
 
 ```yaml
 name: git2jamf_test
 on:
   pull_request:
     branches:
-      - master
+      - main
   push:
     branches: 
       - test*
@@ -106,7 +106,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: git2jamf_test 
-        uses: jgarcesres/git2jamf@master
+        uses: jgarcesres/git2jamf@main
         with: 
           jamf_url: ${{ secrets.jamf_test_url }}
           jamf_username: ${{ secrets.jamf_test_username }}
@@ -118,7 +118,7 @@ name: git2jamf
 on:
   push:
     branches: 
-      - master
+      - main
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
@@ -127,7 +127,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: git2jamf
-        uses: jgarcesres/git2jamf@master
+        uses: jgarcesres/git2jamf@main
         with: 
           jamf_url: ${{ secrets.jamf_prod_url }}
           jamf_username: ${{ secrets.jamf_prod_username }}
@@ -153,7 +153,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: git2jamf_test
-        uses: jgarcesres/git2jamf@master
+        uses: jgarcesres/git2jamf@main
         with: 
           jamf_url: ${{ secrets.jamf_url }}
           jamf_username: ${{ secrets.jamf_username }}
@@ -166,7 +166,7 @@ name: git2jamf
 on:
   push:
     branches: 
-      - master
+      - main
 jobs:
   jamf_scripts:
     runs-on: ubuntu-latest
@@ -175,7 +175,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: git2jamf
-        uses: jgarcesres/git2jamf@master
+        uses: jgarcesres/git2jamf@main
         with: 
           jamf_url: ${{ secrets.jamf_url }}
           jamf_username: ${{ secrets.jamf_username }}
