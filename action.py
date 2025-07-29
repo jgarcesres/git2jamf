@@ -208,18 +208,12 @@ def compare_scripts(new, old):
         return False
 
 
-#function to create a creation note with timestamp
-@logger.catch
-def create_creation_note():
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    return f"created via github action on {timestamp}"
-
-
 #function to create or update notes with proper timestamping
 @logger.catch
 def update_script_notes(existing_notes, action_type="updated"):
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    action_line = f"{action_type} via github action on {timestamp}"
+    commit_hash = os.getenv('GITHUB_SHA', 'unknown')[:7]  # Get first 7 characters of commit hash
+    action_line = f"{action_type} via github action on {timestamp} (commit: {commit_hash})"
     
     if not existing_notes:
         # No existing notes, just add the action line
@@ -330,7 +324,7 @@ def push_scripts():
             logger.info("it doesn't exist, lets create it")
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
-                creation_note = create_creation_note()
+                creation_note = update_script_notes("", "created")
                 payload = {"name": script_name, "info": "", "notes": creation_note, "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":f"{upload_script.read()}"} 
                 create_jamf_script(url, token, payload)
         elif len(script_search) == 1:
