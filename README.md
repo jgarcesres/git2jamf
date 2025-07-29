@@ -1,12 +1,19 @@
 # git2jamf [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-This action grabs the github repository (or any subdfolder of your choice) scans it for scripts and will create or update those scripts in jamf.
+This action grabs the github repository (or any subfolder of your choice) scans it for scripts and will create or update those scripts in jamf.
 
 It starts by comparing filename of the github script (without the extension) against the name of the script in jamf:
-* If it doesn't exist, it will create it
-* if it exists, it will compare the hash of the body of both scripts and update it in jamf if they differ. Github is always treated as the source.
-* If enabled, it will add a prefix with the `branch name_`  to a script. 
+* If it doesn't exist, it will create it with a timestamped note indicating when it was created
+* If it exists, it will compare the hash of the body of both scripts and update it in jamf if they differ. When updating, it will also update the notes with a timestamp of when the script was last updated, preserving any existing custom notes
+* If enabled, it will add a prefix with the `branch name_` to a script. 
 
 After creating and updating scripts, if enabled, it can delete any leftover script that is not found in github, thus keeping Github as your one source.
+
+## Notes Management
+The action automatically manages notes in Jamf scripts:
+- **New scripts**: Get a "created via github action on [timestamp]" note
+- **Updated scripts**: Get an "updated via github action on [timestamp]" note added/updated
+- **Existing notes**: Custom notes are preserved and GitHub action timestamps are kept at the top
+- **Order**: Created timestamp (if present) appears first, followed by updated timestamp, then any custom notes
 
 ## Future state
 * handle extension attributes. 
