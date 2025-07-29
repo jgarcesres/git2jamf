@@ -211,14 +211,14 @@ def compare_scripts(new, old):
 #function to create a creation note with timestamp
 @logger.catch
 def create_creation_note():
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     return f"created via github action on {timestamp}"
 
 
 #function to create or update notes with proper timestamping
 @logger.catch
 def update_script_notes(existing_notes, action_type="updated"):
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     action_line = f"{action_type} via github action on {timestamp}"
     
     if not existing_notes:
