@@ -7,7 +7,7 @@ import requests
 import jmespath
 import hashlib
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from loguru import logger
 
 logger.remove()
