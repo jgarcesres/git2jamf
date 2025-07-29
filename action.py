@@ -7,6 +7,7 @@ import requests
 import jmespath
 import hashlib
 import sys
+from datetime import datetime, timezone
 from loguru import logger
 
 logger.remove()
@@ -207,6 +208,53 @@ def compare_scripts(new, old):
         return False
 
 
+#function to create or update notes with proper timestamping
+@logger.catch
+def update_script_notes(existing_notes, action_type="updated"):
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    commit_hash = os.getenv('GITHUB_SHA', 'unknown')[:7]  # Get first 7 characters of commit hash
+    action_line = f"{action_type} via github action on {timestamp} (commit: {commit_hash})"
+    
+    if not existing_notes:
+        # No existing notes, just add the action line
+        return action_line
+    
+    lines = existing_notes.strip().split('\n')
+    updated_lines = []
+    found_created_line = False
+    found_updated_line = False
+    
+    # Look for existing github action lines
+    for line in lines:
+        line = line.strip()
+        if line.startswith("created via github action"):
+            if not found_created_line:
+                updated_lines.append(line)  # Keep the original created line
+                found_created_line = True
+            # Skip duplicate created lines
+        elif line.startswith("updated via github action"):
+            if not found_updated_line:
+                updated_lines.append(action_line)  # Replace with new updated line
+                found_updated_line = True
+            # Skip old updated lines
+        else:
+            # Keep other notes
+            if line:  # Only add non-empty lines
+                updated_lines.append(line)
+    
+    # If we didn't find an existing updated line, add it after created line (if exists) or at the top
+    if not found_updated_line:
+        if found_created_line:
+            # Insert after the created line
+            insert_index = 1 if len(updated_lines) > 0 else 0
+            updated_lines.insert(insert_index, action_line)
+        else:
+            # Insert at the beginning
+            updated_lines.insert(0, action_line)
+    
+    return '\n'.join(updated_lines)
+
+
 #retrieves list of files given a folder path and the list of valid file extensions to look for
 @logger.catch
 def find_local_scripts(script_dir, script_extensions):
@@ -276,7 +324,8 @@ def push_scripts():
             logger.info("it doesn't exist, lets create it")
             #it doesn't exist, we can create it
             with open(script, 'r') as upload_script:
-                payload = {"name": script_name, "info": "", "notes": "created via github action", "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":f"{upload_script.read()}"} 
+                creation_note = update_script_notes("", "created")
+                payload = {"name": script_name, "info": "", "notes": creation_note, "priority": "AFTER" , "categoryId": "1", "categoryName":"", "parameter4":"", "parameter5":"", "parameter6":"", "parameter7":"", "parameter8":"", "parameter9":"",  "parameter10":"", "parameter11":"", "osRequirements":"", "scriptContents":f"{upload_script.read()}"} 
                 create_jamf_script(url, token, payload)
         elif len(script_search) == 1:
             jamf_script = script_search.pop()
@@ -290,6 +339,9 @@ def push_scripts():
                     logger.info("the local version is different than the one in jamf, updating jamf")
                     #the hash of the scripts is not the same, so we'll update it
                     jamf_script['scriptContents'] = script_text
+                    # Update the notes with timestamp
+                    existing_notes = jamf_script.get('notes', '')
+                    jamf_script['notes'] = update_script_notes(existing_notes, "updated")
                     update_jamf_script(url, token, jamf_script)
                 else:
                     logger.info("we're skipping this one.")
