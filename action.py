@@ -151,45 +151,103 @@ def find_jamf_script(url, token, script_name, page = 0):
         raise Exception("failed to find the script, please investigate!")
 
 
-#function to find a EA script using the filename as the script name
+#function to get all extension attributes using the new API
 @logger.catch
-def find_ea_script(ea_name):
-    ea_script = requests.get(url = f"{url}/JSSResource/computerextensionattributes/name/{ea_name}", auth=(username,password))
-    if ea_script.status_code == requests.codes.ok:
-        return ea_script.json()['computer_extension_attribute']
-    elif ea_script.status_code == requests.codes.not_found:
-        logger.warning(f"Found no script with name: {ea_name}")
-        return None
+def get_all_jamf_extension_attributes(url, token, eas = [], page = 0):
+    header = {"Authorization": f"Bearer {token}"}
+    page_size=50
+    params = {"page": page, "page-size": page_size, "sort": "name:asc"}
+    ea_list = requests.get(url=f"{url}/uapi/v1/computer-extension-attributes", headers=header, params=params)
+    if ea_list.status_code == requests.codes.ok:
+        ea_list = ea_list.json()
+        logger.info(f"we got {len(ea_list['results'])+page} of {ea_list['totalCount']} EA results")
+        page+=1
+        if (page*page_size) < ea_list['totalCount']:
+            logger.info("seems there's more EAs to grab")
+            eas.extend(ea_list['results'])
+            return get_all_jamf_extension_attributes(url, token, eas, page)
+        else:
+            logger.info("reached the end of our EA search")
+            eas.extend(ea_list['results'])
+            logger.success(f"retrieved {len(eas)} total extension attributes")
+            return eas
     else:
-        logger.error("encountered an error retriving the extension attribute, stopping")
-        logger.error(ea_script.text)
-        raise Exception("encountered an error retriving the extension attribute, stopping")
+        logger.error(f"status code: {ea_list.status_code}")
+        logger.error("error retrieving extension attribute list")
+        logger.error(ea_list.text)
+        raise Exception("error retrieving extension attribute list")
 
 
-#function to create EA script
+#function to find a specific extension attribute by name using the new API
 @logger.catch
-def create_ea_script(payload, id):
-    headers = {"Accept": "text/xml", "Content-Type": "text/xml"}
-    ea_script = requests.post(url = f"{url}/JSSResource/computerextensionattributes/id/{id}", json=payload, auth=(username,password))
-    if ea_script.status_code == requests.codes.ok:
-        return "success"
+def find_jamf_extension_attribute(url, token, ea_name, page = 0):
+    header = {"Authorization": f"Bearer {token}"}
+    page_size=50
+    params = {"page": page, "page-size": page_size, "sort": "name:asc"}
+    ea_list = requests.get(url=f"{url}/uapi/v1/computer-extension-attributes", headers=header, params=params)
+    if ea_list.status_code == requests.codes.ok:
+        ea_list = ea_list.json()
+        logger.info(f"we have searched {len(ea_list['results'])+page} of {ea_list['totalCount']} EA results")
+        ea_search = jmespath.search(f"results[?name == '{ea_name}']", ea_list)
+        if len(ea_search) == 1:
+            logger.info('found the extension attribute, returning it')
+            return ea_search[0]
+        elif len(ea_search) == 0 and (page*page_size) < ea_list['totalCount']:
+            logger.info("couldn't find the EA in this page, seems there's more to look through")
+            return find_jamf_extension_attribute(url, token, ea_name, page+1)
+        else:
+            logger.info(f"did not find any extension attribute named {ea_name}")
+            return "n/a"
     else:
-        logger.error("encountered an error creating the extension attribute, stopping")
-        logger.error(ea_script.text)
-        raise Exception("encountered an error creating the extension attribute, stopping")
+        logger.error(f"status code: {ea_list.status_code}")
+        logger.error("error retrieving extension attribute list")
+        logger.error(ea_list.text)
+        raise Exception("failed to find the extension attribute, please investigate!")
 
 
-#function to update existin EA script
+#function to create a new extension attribute using the new API
 @logger.catch
-def update_ea_script(payload, id):
-    headers = {"Accept": "text/xml", "Content-Type": "text/xml"}
-    ea_script = requests.put(url=f"{url}/JSSResource/computerextensionattributes/id/{id}", json=payload, auth=(username,password))
-    if ea_script.status_code == requests.codes.ok:
-        return "success"
+def create_jamf_extension_attribute(url, token, payload):
+    header = {"Authorization": f"Bearer {token}"}
+    ea_request = requests.post(url=f"{url}/uapi/v1/computer-extension-attributes", headers=header, json=payload)
+    if ea_request.status_code == requests.codes.created:
+        logger.success("extension attribute created")
+        return True
     else:
-        logger.error("encountered an error creating the extension attribute, stopping")
-        logger.error(ea_script.text)
-        raise Exception("encountered an error creating the extension attribute, stopping")
+        logger.warning("failed to create the extension attribute")
+        logger.debug(f"status code for create: {ea_request.status_code}")
+        logger.warning(ea_request.text)
+        return False
+
+
+#function to update an existing extension attribute using the new API
+@logger.catch
+def update_jamf_extension_attribute(url, token, payload):
+    header = {"Authorization": f"Bearer {token}"}
+    ea_request = requests.put(url=f"{url}/uapi/v1/computer-extension-attributes/{payload['id']}", headers=header, json=payload)
+    if ea_request.status_code in [requests.codes.accepted, requests.codes.ok]:
+        logger.success("extension attribute was updated successfully")
+        return True
+    else:
+        logger.warning("failed to update the extension attribute")
+        logger.debug(f"status code for put: {ea_request.status_code}")
+        logger.warning(ea_request.text)
+        return False
+
+
+#function to delete an extension attribute using the new API
+@logger.catch
+def delete_jamf_extension_attribute(url, token, id):
+    header = {"Authorization": f"Bearer {token}"}
+    ea_request = requests.delete(url=f"{url}/uapi/v1/computer-extension-attributes/{id}", headers=header)
+    if ea_request.status_code in [requests.codes.ok, requests.codes.accepted, requests.codes.no_content]:
+        logger.success("extension attribute was deleted successfully")
+        return True
+    else:
+        logger.warning("failed to delete the extension attribute")
+        logger.debug(f"status code for delete: {ea_request.status_code}")
+        logger.warning(ea_request.text)
+        return False
 
 
 #function to compare sripts and see if they have changed. If they haven't, no need to update it
@@ -209,11 +267,20 @@ def compare_scripts(new, old):
 
 #retrieves list of files given a folder path and the list of valid file extensions to look for
 @logger.catch
-def find_local_scripts(script_dir, script_extensions):
+def find_local_scripts(script_dir, script_extensions, exclude_dir=None):
     script_list = []
     logger.info(f"searching for files ending in {script_extensions} in {script_dir}")
     for file_type in script_extensions:
         script_list.extend(glob.glob(f"{script_dir}/**/*.{file_type}", recursive = True))
+    
+    # Filter out files from the exclude directory if specified
+    if exclude_dir and exclude_dir != 'false':
+        original_count = len(script_list)
+        script_list = [script for script in script_list if not script.startswith(exclude_dir)]
+        excluded_count = original_count - len(script_list)
+        if excluded_count > 0:
+            logger.info(f"excluded {excluded_count} files from EA script directory: {exclude_dir}")
+    
     logger.info("found these: ", script_dir)
     logger.info(script_list)
     return script_list
@@ -226,14 +293,14 @@ def get_script_name(script_path):
 
 
 @logger.catch
-def push_scripts():
+def push_scripts(exclude_ea_dir=None):
     #grab the token from jamf
     logger.info('grabing the token from jamf')
     token = get_jamf_token(url,auth_type, username, password)
     logger.info('checking the list of local scripts to upload or create')
     scripts = {}
     #this retrives the full path of the scripts we're trying to sync from github
-    scripts['github'] = find_local_scripts(script_dir, script_extensions)
+    scripts['github'] = find_local_scripts(script_dir, script_extensions, exclude_ea_dir)
     #I need to simplify this array down to the just the name of the script, stripping out the path.
     scripts['github_simple_name'] = []
     for script in scripts['github']:
@@ -304,8 +371,121 @@ def push_scripts():
     logger.success("finished with the scripts")  
 
 
+@logger.catch
 def push_ea_scripts():
-    return ""
+    if ea_script_dir == 'false':
+        logger.warning("EA script directory not set, skipping EA script processing")
+        return
+    
+    logger.info('starting EA script processing')
+    #grab the token from jamf
+    logger.info('grabbing the token from jamf for EA scripts')
+    token = get_jamf_token(url, auth_type, username, password)
+    logger.info('checking the list of local EA scripts to upload or create')
+    ea_scripts = {}
+    
+    #this retrieves the full path of the EA scripts we're trying to sync from github
+    ea_scripts['github'] = find_local_scripts(ea_script_dir, script_extensions)
+    
+    #I need to simplify this array down to just the name of the script, stripping out the path.
+    ea_scripts['github_simple_name'] = []
+    for ea_script in ea_scripts['github']:
+        ea_scripts['github_simple_name'].append(get_script_name(ea_script).lower())
+    
+    logger.info('double-checking for duplicate EA script names')
+    for count, ea_script in enumerate(ea_scripts['github_simple_name']):
+        if ea_scripts['github_simple_name'].count(ea_script) >= 2:
+            logger.error(f"the EA script name {ea_script} is duplicated {ea_scripts['github_simple_name'].count(ea_script)} times, please give it a unique name")
+            sys.exit(1)
+    
+    #continue if no dupes are found
+    logger.success("nice, no duplicate EA script names, we can continue")
+    logger.info('now checking jamf for its list of extension attributes')
+    ea_scripts['jamf'] = get_all_jamf_extension_attributes(url, token)
+    logger.info("setting all EA names to lower case to avoid false positives in our search.")
+    logger.info("worry not, this won't affect the actual naming :)")
+    
+    #save the EA names all in lower_case
+    for ea_script in ea_scripts['jamf']:
+        ea_script['lower_case_name'] = ea_script['name'].lower()
+    
+    #make a copy of the jamf EAs, we'll use this to determine which to delete later on
+    ea_scripts['to_delete'] = ea_scripts['jamf']
+    
+    logger.info("processing each EA script now")
+    for count, ea_script in enumerate(ea_scripts['github']):
+        logger.info("----------------------")
+        logger.info(f"EA script {count+1} of {len(ea_scripts['github'])}")
+        logger.info(f"path of the EA script: {ea_script}")
+        ea_script_name = get_script_name(ea_script)
+        
+        if enable_prefix == "false":
+            #don't use the prefix
+            logger.info(f"EA script name is: {ea_script_name}")
+        else:
+            #use the branch name as prefix
+            prefix = branch.split('/')[-1]
+            ea_script_name = f"{prefix}_{ea_script_name}"
+            logger.info(f"the new EA script name: {ea_script_name}")
+        
+        #check to see if the EA script name exists in jamf
+        logger.info(f"now let's see if {ea_script_name} exists in jamf already")
+        ea_search = jmespath.search(f"[?lower_case_name == '{ea_script_name.lower()}']", ea_scripts['jamf'])
+        
+        if len(ea_search) == 0:
+            logger.info("it doesn't exist, lets create it")
+            #it doesn't exist, we can create it
+            with open(ea_script, 'r') as upload_ea_script:
+                ea_script_content = upload_ea_script.read()
+                payload = {
+                    "name": ea_script_name,
+                    "enabled": True,
+                    "description": "Extension attribute script created via git2jamf",
+                    "dataType": "String",
+                    "inputType": {
+                        "type": "Script",
+                        "platform": "Mac",
+                        "script": ea_script_content
+                    },
+                    "inventoryDisplay": "General",
+                    "reconDisplay": "Extension Attributes"
+                }
+                create_jamf_extension_attribute(url, token, payload)
+                
+        elif len(ea_search) == 1:
+            jamf_ea = ea_search.pop()
+            del jamf_ea['lower_case_name']
+            ea_scripts['to_delete'].remove(jamf_ea)
+            logger.info("it does exist, lets compare them")
+            #it does exist, lets see if it has changed
+            with open(ea_script, 'r') as upload_ea_script:
+                ea_script_content = upload_ea_script.read()
+                # Check if the script content is different
+                current_script = ""
+                if 'inputType' in jamf_ea and 'script' in jamf_ea['inputType']:
+                    current_script = jamf_ea['inputType']['script']
+                
+                if not compare_scripts(ea_script_content, current_script):
+                    logger.info("the local EA version is different than the one in jamf, updating jamf")
+                    #the hash of the scripts is not the same, so we'll update it
+                    jamf_ea['inputType']['script'] = ea_script_content
+                    update_jamf_extension_attribute(url, token, jamf_ea)
+                else:
+                    logger.info("we're skipping this EA script.")
+    
+    if delete == 'true':
+        logger.warning(f"we have {len(ea_scripts['to_delete'])} extension attributes left to delete")
+        for ea_script in ea_scripts['to_delete']:
+            # Only delete extension attributes that have scripts (not other types like text input, etc.)
+            if 'inputType' in ea_script and ea_script['inputType'].get('type', '').lower() == 'script':
+                logger.info(f"attempting to delete extension attribute {ea_script['name']} in jamf")
+                delete_jamf_extension_attribute(url, token, ea_script['id'])
+            else:
+                logger.info(f"skipping deletion of non-script extension attribute: {ea_script['name']}")
+    
+    logger.info("expiring the token so it can't be used further")
+    invalidate_jamf_token(url, token)
+    logger.success("finished with the EA scripts")
 
 
 #run this thing
@@ -325,6 +505,9 @@ if __name__ == "__main__":
     workspace_dir = os.getenv('GITHUB_WORKSPACE')
     if script_dir != workspace_dir:
         script_dir = f"{workspace_dir}/{script_dir}"
+    # Process EA script directory path if it's set
+    if ea_script_dir != 'false' and ea_script_dir != workspace_dir:
+        ea_script_dir = f"{workspace_dir}/{ea_script_dir}"
     enable_prefix = os.getenv('INPUT_PREFIX')
     branch = os.getenv('GITHUB_REF')
     script_extensions = os.getenv('INPUT_SCRIPT_EXTENSIONS')
@@ -333,6 +516,7 @@ if __name__ == "__main__":
     logger.info(f"url is: {url}")
     logger.info(f"workspace dir is: {workspace_dir}")
     logger.info(f"script_dir is:  {script_dir}")
+    logger.info(f"ea_script_dir is: {ea_script_dir}")
     logger.info(f"branch is set to: {branch}")
     logger.info(f"script_deletion is: {delete}")
     logger.info(f"scripts_extensions are: {script_extensions}")
@@ -341,7 +525,7 @@ if __name__ == "__main__":
     else:
         logger.warning(f"prefix enabled, using: {branch.split('/')[-1]}")
     #run the block to push the "normal" scripts to jamf
-    push_scripts() 
+    push_scripts(ea_script_dir if ea_script_dir != 'false' else None) 
     #check to see if we have an EA scripts to push over
     if ea_script_dir != 'false':
         logger.info("we have some EA scripts to process")
