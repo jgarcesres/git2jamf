@@ -8,8 +8,14 @@ It starts by comparing filename of the github script (without the extension) aga
 
 After creating and updating scripts, if enabled, it can delete any leftover script that is not found in github, thus keeping Github as your one source.
 
-## Future state
-* handle extension attributes. 
+## Features
+* ✅ **Script Management**: Create, update and delete scripts in Jamf from your GitHub repository
+* ✅ **Extension Attribute Scripts**: Support for extension attribute scripts with dedicated folder separation
+* ✅ **Branch Prefixing**: Optional branch name prefixing for test/staging workflows
+* ✅ **Duplicate Detection**: Automatic detection and prevention of duplicate script names
+* ✅ **Smart Sync**: Hash-based comparison to only update scripts that have actually changed
+
+## Future state  
 * slack notifications
 * suggestions are welcome!
 
@@ -34,9 +40,13 @@ After creating and updating scripts, if enabled, it can delete any leftover scri
 
 **optional** the directory where the scripts to upload will be, this could be a subdirectoy in your repository `path/to/scripts`. By default it will try to sync all .sh and .py files from the repo, so it's **greatly recommended to provide this input**,  you can look for multiple subdirectories that share the same name, just provide a name like `**/scripts`
 
+### `ea_script_dir`
+
+**optional** the directory where extension attribute scripts are located, this should be separate from your regular scripts directory. By default this is `false` (disabled). When enabled, these scripts will be created/updated as extension attributes in Jamf Pro instead of regular scripts. **Important**: Extension attribute scripts will be automatically excluded from regular script processing to prevent conflicts.
+
 ### `script_extensions`
 
-**optional** the extensions for the types of files we'll be searching for. By default it tries to look for `*.sh and *.py` files. To change the behavior, separate each extension with spaces and no periods. ie `sh py ps1`
+**optional** the extensions for the types of files we'll be searching for. By default it tries to look for `*.sh and *.py` files. To change the behavior, separate each extension with spaces and no periods. ie `sh py ps1`. This setting applies to both regular scripts and extension attribute scripts.
 
 ### `delete`
 
@@ -83,6 +93,38 @@ jobs:
           jamf_password: ${{ secrets.jamf_test_password }}
           script_dir: 'scripts'
 ```
+
+## Example usage with extension attributes
+
+If you want to sync both regular scripts and extension attribute scripts, you can specify separate directories for each:
+
+```yaml
+name: git2jamf
+on:
+  push:
+    branches: 
+      - main
+jobs:
+  jamf_scripts:
+    runs-on: ubuntu-latest
+    name: git2jamf
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: git2jamf
+        uses: jgarcesres/git2jamf@main
+        with: 
+          jamf_url: ${{ secrets.jamf_url }}
+          jamf_username: ${{ secrets.jamf_username }}
+          jamf_password: ${{ secrets.jamf_password }}
+          script_dir: 'scripts'
+          ea_script_dir: 'extension-attributes'
+```
+
+In this setup:
+- Regular scripts go in the `scripts/` directory and become Jamf Pro scripts
+- Extension attribute scripts go in the `extension-attributes/` directory and become Jamf Pro extension attributes
+- The two directories are processed separately to prevent conflicts
 
 
 ## Example usage with 2 instances
@@ -181,6 +223,37 @@ jobs:
           jamf_username: ${{ secrets.jamf_username }}
           jamf_password: ${{ secrets.jamf_password }}
           script_dir: toplevelfolder/scripts
+```
+
+## Troubleshooting
+
+### Extension Attribute API Issues
+
+If you encounter errors related to extension attributes such as "Extension attributes endpoint not found", this may indicate:
+
+1. **API Endpoint Compatibility**: The extension attribute API endpoints may vary between Jamf Pro versions. The current implementation uses `/uapi/v1/computer-extension-attributes` which should work with newer Jamf Pro versions.
+
+2. **Jamf Pro Version**: Extension attribute support in the Jamf Pro API was added in later versions. Ensure your Jamf Pro instance supports extension attributes in the modern API.
+
+3. **Permissions**: Verify that your API user has the necessary permissions to read, create, and update computer extension attributes.
+
+If you encounter API endpoint issues, please:
+- Check your Jamf Pro version and API documentation
+- Verify your user has extension attribute permissions
+- Consider filing an issue with details about your Jamf Pro version and the specific error messages
+
+### Directory Structure
+
+Make sure your directory structure separates regular scripts from extension attribute scripts:
+
+```
+your-repo/
+├── scripts/              # Regular Jamf Pro scripts
+│   ├── install_app.sh
+│   └── configure_system.py
+└── extension-attributes/  # Extension attribute scripts  
+    ├── check_app_version.sh
+    └── get_system_info.py
 ```
 
 

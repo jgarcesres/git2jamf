@@ -157,6 +157,8 @@ def get_all_jamf_extension_attributes(url, token, eas = [], page = 0):
     header = {"Authorization": f"Bearer {token}"}
     page_size=50
     params = {"page": page, "page-size": page_size, "sort": "name:asc"}
+    # Note: This endpoint may need verification against your Jamf Pro version
+    # Common possibilities: computer-extension-attributes, computerextensionattributes, extension-attributes
     ea_list = requests.get(url=f"{url}/uapi/v1/computer-extension-attributes", headers=header, params=params)
     if ea_list.status_code == requests.codes.ok:
         ea_list = ea_list.json()
@@ -171,9 +173,17 @@ def get_all_jamf_extension_attributes(url, token, eas = [], page = 0):
             eas.extend(ea_list['results'])
             logger.success(f"retrieved {len(eas)} total extension attributes")
             return eas
+    elif ea_list.status_code == requests.codes.not_found:
+        logger.error("Extension attributes endpoint not found. This may indicate:")
+        logger.error("1. The API endpoint '/uapi/v1/computer-extension-attributes' doesn't exist in your Jamf Pro version")
+        logger.error("2. Your Jamf Pro version may not support extension attributes in the new API yet")
+        logger.error("3. The endpoint name might be different (try checking Jamf Pro API documentation)")
+        logger.error("Please verify the correct endpoint for your Jamf Pro version")
+        raise Exception("Extension attributes API endpoint not found")
     else:
         logger.error(f"status code: {ea_list.status_code}")
         logger.error("error retrieving extension attribute list")
+        logger.error(f"endpoint used: {url}/uapi/v1/computer-extension-attributes")
         logger.error(ea_list.text)
         raise Exception("error retrieving extension attribute list")
 
@@ -213,9 +223,16 @@ def create_jamf_extension_attribute(url, token, payload):
     if ea_request.status_code == requests.codes.created:
         logger.success("extension attribute created")
         return True
+    elif ea_request.status_code == requests.codes.not_found:
+        logger.error("Extension attributes create endpoint not found")
+        logger.error("This may indicate the API endpoint doesn't exist in your Jamf Pro version")
+        logger.error(f"endpoint used: {url}/uapi/v1/computer-extension-attributes")
+        return False
     else:
         logger.warning("failed to create the extension attribute")
         logger.debug(f"status code for create: {ea_request.status_code}")
+        logger.debug(f"endpoint used: {url}/uapi/v1/computer-extension-attributes")
+        logger.warning("Response body:")
         logger.warning(ea_request.text)
         return False
 
@@ -228,9 +245,15 @@ def update_jamf_extension_attribute(url, token, payload):
     if ea_request.status_code in [requests.codes.accepted, requests.codes.ok]:
         logger.success("extension attribute was updated successfully")
         return True
+    elif ea_request.status_code == requests.codes.not_found:
+        logger.error(f"Extension attribute with id {payload['id']} not found for update")
+        logger.error(f"endpoint used: {url}/uapi/v1/computer-extension-attributes/{payload['id']}")
+        return False
     else:
         logger.warning("failed to update the extension attribute")
         logger.debug(f"status code for put: {ea_request.status_code}")
+        logger.debug(f"endpoint used: {url}/uapi/v1/computer-extension-attributes/{payload['id']}")
+        logger.warning("Response body:")
         logger.warning(ea_request.text)
         return False
 
